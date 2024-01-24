@@ -25,7 +25,7 @@ namespace UnityCar
 
         public float ControllerInputReverse
         {
-            get { return controllerInputReverse; }
+            get { return 0f; }
         }
 
         public float ControllerInputHandBrake
@@ -38,8 +38,8 @@ namespace UnityCar
         {
             controllerInputX = Input.GetAxis("Horizontal");
             controllerInputY = Input.GetAxis("Vertical");
-            controllerInputReverse = Input.GetAxis("Reverse");
-            controllerInputHandBrake = Input.GetAxis("HandBrake");
+            // controllerInputReverse = Input.GetAxis("Reverse");
+            // controllerInputHandBrake = Input.GetAxis("HandBrake");
         }
 
     }
