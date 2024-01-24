@@ -94,7 +94,7 @@ namespace UnityCar
             // if automatic, select gear appropriate for vehicle speed (unless reverse requested)
             if (transmission.GetAutomatic)
             {
-                if (inputR > 0.1) transmission.SelectReverse();
+                if (Input.GetKey(KeyCode.R)) transmission.SelectReverse();
                 else transmission.SetGear(suspension.GetNoSlipWheelRPM(vel), engine.GetEngineRPMMaxPower);
             }
 
