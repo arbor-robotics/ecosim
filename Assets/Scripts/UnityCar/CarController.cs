@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,9 @@ namespace UnityCar
         [SerializeField] private float mass = 1200.0f;
         [SerializeField] private Vector3 coG = new Vector3(0.0f, 0.435f, -2.5f);
         [SerializeField] private Vector3 inertiaTensor = new Vector3(3600.0f, 3900.0f, 800.0f);
+
+        public Transform frWheelModel;
+
 
         public float GetVel { get { return vel; } }
         public float GetMass { get { return mass; } }
@@ -157,10 +161,22 @@ namespace UnityCar
             for (int i = 0; i < 4; i++)
             {
                 wC[i].GetWorldPose(out Vector3 wcPosition, out Quaternion wcRotation);
+                
+                
                 transWheel = wC[i].gameObject.transform.GetChild(0);
                 transWheel.transform.position = wcPosition;
-                transWheel.transform.localPosition = new Vector3(transWheel.transform.localPosition.x, transWheel.transform.localPosition.y, transWheel.transform.localPosition.z);
+
+
+                float offset = 0.4f;
+                if (i % 2 == 0)
+                    transWheel.transform.localPosition = new Vector3(transWheel.transform.localPosition.y- offset, transWheel.transform.localPosition.y, transWheel.transform.localPosition.z);
+                else
+                    transWheel.transform.localPosition = new Vector3(transWheel.transform.localPosition.y+ offset, transWheel.transform.localPosition.y, transWheel.transform.localPosition.z);
+
                 transWheel.transform.rotation = wcRotation;
+
+                // frWheelModel.transform.position = wcPosition;
+                // frWheelModel.transform.rotation = wcRotation;
             }
         }
 
