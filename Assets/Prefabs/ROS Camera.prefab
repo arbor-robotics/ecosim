@@ -142,6 +142,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NodeName: CameraPublisherFrontCenter
-  TopicName: /camera_front_center
+  CameraName: front_center
   CameraPixelWidth: 800
   CameraPixelHeight: 600

@@ -4,128 +4,103 @@ using System;
 using std_msgs.msg;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Collections;
+using System.Security.Cryptography;
 
 namespace ROS2
 {
     public class CameraPublisher : MonoBehaviour
     {
         // Start is called before the first frame update
-        private ROS2UnityComponent ros2Unity;
-        private ROS2Node ros2Node;
-        private IPublisher<sensor_msgs.msg.Image> image_pub;
+        private ROS2UnityComponent rosUnityComponent;
+        private ROS2Node rosNode;
+        private IPublisher<sensor_msgs.msg.Image> imagePublisher;
+        private IPublisher<sensor_msgs.msg.CameraInfo> cameraInfoPublisher;
 
-        public string NodeName;
-        public string TopicName;
-        public uint CameraPixelWidth = 800;
-        public uint CameraPixelHeight = 600;
+        public string nodeName;
+        public string cameraName;
+        public int cameraPixelWidth = 800;
+        public int cameraPixelHeight = 600;
+        private RenderTexture renderTexture;
+        Texture2D screenShot;
+        byte[] rawCameraData;
 
         private new Camera camera;
 
         void Start()
         {
-            ros2Unity = GetComponentInParent<ROS2UnityComponent>();
+            rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
             camera = GetComponent<Camera>();
 
-            // We want to handle rendering manually.
-            // By disabling the camera like this,
-            // we prevent Unity from rendering to the screen.
-            camera.enabled = false;
-
-
-            // Flip the axis: ROS assumes an image origin at the top left.
-            // In Unity, the origin is bottom left.
+            // Fix flipped camera (ROS has different vertical axis than Unity)
             Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
-
-            // camera.targetTexture = renderTexture;
             camera.projectionMatrix *= scale;
+
+            renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
+
+            // 4 bytes per pixel (RGBA)
+            rawCameraData = new byte[cameraPixelWidth * cameraPixelHeight * 4];
+
+            screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
+            camera.targetTexture = renderTexture;
+        }
+
+        /// <summary>
+        /// SLOW conversion from NativeArray to byte[].
+        /// Likely slow due to GPU memory access, but that's just a theory.
+        /// </summary>
+        /// <param name="from">NativeArray with pixel data</param>
+        void PopulateBytesFromNativeArray(NativeArray<byte> from)
+        {
+            // var prev = Time.time;
+            for (int i = 0; i < from.Length; i++)
+            {
+                rawCameraData[i] = from[i];
+            }
+            // var elapsed = Time.time - prev;
+            // Debug.Log("Took "+elapsed);
         }
 
         void Update()
         {
-            if (ros2Unity.Ok())
+            if (rosUnityComponent.Ok())
             {
-                if (ros2Node == null)
+                if (rosNode == null)
                 {
                     // Set up the node and publisher.
-                    ros2Node = ros2Unity.CreateNode(NodeName);
-                    image_pub = ros2Node.CreatePublisher<sensor_msgs.msg.Image>(TopicName);
+                    rosNode = rosUnityComponent.CreateNode(nodeName);
+                    imagePublisher = rosNode.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + cameraName + "/image_color");
+                    cameraInfoPublisher = rosNode.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + cameraName + "/camera_info");
                 }
-
-                Texture2D tex = GetCameraImage();
-                
-                // Encode the texture in JPG format
-                // byte[] bytes = ImageConversion.EncodeToJPG(tex);
-                UnityEngine.Object.Destroy(tex);
-
-                // Debug.Log(tex.GetPixelData<byte>(0).Length);
-
-                // Publish to ROS
                 sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
 
-                byte[] image_data = tex.GetPixelData<byte>(0).ToArray();
-
-
-                // Array.Reverse(image_data);
-                image_msg.Data = image_data;
+                image_msg.Data = rawCameraData;
                 image_msg.Encoding = "rgba8";
-                image_msg.Height = CameraPixelHeight;
-                image_msg.Width = CameraPixelWidth;
-
-                image_pub.Publish(image_msg);
-
-                // Write the returned byte array to a file in the project folder
-                // File.WriteAllBytes($"/home/main/{NodeName}.jpg", bytes);
+                image_msg.Height = (uint)cameraPixelHeight;
+                image_msg.Width = (uint)cameraPixelWidth;
+                imagePublisher.Publish(image_msg);
             }
-        }
-
-        Texture2D FlipTexture(Texture2D original){
-            Texture2D flipped = new Texture2D(original.width,original.height);
-         
-            int xN = original.width;
-            int yN = original.height;
-         
-         
-           for(int i=0;i<xN;i++){
-              for(int j=0;j<yN;j++){
-                  flipped.SetPixel(xN-i-1, j, original.GetPixel(i,j));
-              }
-           }
-            flipped.Apply();
-         
-            return flipped;
-        }
-
-        private Texture2D GetCameraImage()
-        {
-            // https://discussions.unity.com/t/mirror-flip-camera/56560/2
-            // Altering the projection matrix disturbs how normal vectors are calculated
-            // during rendering. Use this to reverse the disturbance.
             GL.invertCulling = true;
-
-            int width = (int) CameraPixelWidth;
-            int height = (int) CameraPixelHeight;
-            Rect rect = new Rect(0, 0, width, height);
-            RenderTexture renderTexture = new RenderTexture(width, height, 24);
-            Texture2D screenShot = new Texture2D(width, height, TextureFormat.RGBA32, false);
-
-            // By setting targetTexture, we tell Unity to disable rendering to the screen (in theory, at least)
-            camera.targetTexture = renderTexture;
             camera.Render();
+            GL.invertCulling = false;
+
+            Rect rect = new Rect(0, 0, cameraPixelWidth, cameraPixelHeight);
 
             RenderTexture.active = renderTexture;
             screenShot.ReadPixels(rect, 0, 0);
-
-            camera.targetTexture = null;
             RenderTexture.active = null;
 
-            Destroy(renderTexture);
-            renderTexture = null;
+            // Graphics.CopyTexture(renderTexture, screenShot);
 
-            // Reset this.
-            GL.invertCulling = false;
+            // byte[] imageData = screenShot.EncodeToPNG();
+            var pixels = screenShot.GetPixelData<byte>(0);
+            // Debug.Log(pixels.Length);
+            PopulateBytesFromNativeArray(pixels);
+            // byte[] imageData = screenShot.GetRawTextureData<byte>().ToArray();
+            // pixels = null;
 
-            return screenShot;
         }
+
     }
 
 }  // namespace ROS2
