@@ -148,8 +148,14 @@ namespace ROS2
             camera.targetTexture = null;
             RenderTexture.active = null;
 
-            Destroy(renderTexture);
-            renderTexture = null;
+            // Destroy(renderTexture);
+
+            // DestroyImmediate(renderTexture);
+            // Texture2D[] textures = FindObjectsOfType<Texture2D>();
+            // foreach (Texture2D tx in textures)
+            // {
+            //     Destroy(tx);
+            // }
 
             // Reset this.
             GL.invertCulling = false;
