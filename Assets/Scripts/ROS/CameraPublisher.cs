@@ -31,6 +31,11 @@ namespace ROS2
         {
             rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
             camera = GetComponent<Camera>();
+
+            // Fix flipped camera (ROS has different vertical axis than Unity)
+            Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
+            camera.projectionMatrix *= scale;
+
             renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
 
             // 4 bytes per pixel (RGBA)
@@ -58,7 +63,6 @@ namespace ROS2
 
         void Update()
         {
-
             if (rosUnityComponent.Ok())
             {
                 if (rosNode == null)
@@ -76,7 +80,9 @@ namespace ROS2
                 image_msg.Width = (uint)cameraPixelWidth;
                 imagePublisher.Publish(image_msg);
             }
+            GL.invertCulling = true;
             camera.Render();
+            GL.invertCulling = false;
 
             Rect rect = new Rect(0, 0, cameraPixelWidth, cameraPixelHeight);
 
@@ -92,6 +98,7 @@ namespace ROS2
             PopulateBytesFromNativeArray(pixels);
             // byte[] imageData = screenShot.GetRawTextureData<byte>().ToArray();
             // pixels = null;
+
         }
 
     }
