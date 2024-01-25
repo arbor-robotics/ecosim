@@ -21,12 +21,15 @@ namespace ROS2
         public uint CameraPixelHeight = 600;
 
         private new Camera camera;
+        private Texture2D screenShot;
+        private RenderTexture renderTexture;
 
         void Start()
         {
             ros2Unity = GetComponentInParent<ROS2UnityComponent>();
             camera = GetComponent<Camera>();
-
+            screenShot = new Texture2D((int) CameraPixelWidth, (int) CameraPixelHeight, TextureFormat.RGBA32, false);
+            renderTexture = new RenderTexture((int) CameraPixelWidth, (int) CameraPixelHeight, 24);
             // We want to handle rendering manually.
             // By disabling the camera like this,
             // we prevent Unity from rendering to the screen.
@@ -51,13 +54,14 @@ namespace ROS2
                     ros2Node = ros2Unity.CreateNode(NodeName);
                     image_pub = ros2Node.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + CameraName + "/image_color");
                     info_pub = ros2Node.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + CameraName + "/camera_info");
+                    Debug.Log("Done creating ROS objects!");
                 }
 
-                Texture2D tex = GetCameraImage();
+                Texture2D tex = screenShot;
+                tex.name = "ROS Camera Texture2D";
                 
                 // Encode the texture in JPG format
                 // byte[] bytes = ImageConversion.EncodeToJPG(tex);
-                UnityEngine.Object.Destroy(tex);
 
                 // Debug.Log(tex.GetPixelData<byte>(0).Length);
 
@@ -73,6 +77,7 @@ namespace ROS2
                 // Now public CameraInfo
                 sensor_msgs.msg.CameraInfo info_msg = GetCameraInfo();
                 info_pub.Publish(info_msg);
+                DestroyImmediate(tex);
 
                 // Write the returned byte array to a file in the project folder
                 // File.WriteAllBytes($"/home/main/{NodeName}.jpg", bytes);
@@ -108,24 +113,7 @@ namespace ROS2
             return info_msg;
         }
 
-        Texture2D FlipTexture(Texture2D original){
-            Texture2D flipped = new Texture2D(original.width,original.height);
-         
-            int xN = original.width;
-            int yN = original.height;
-         
-         
-           for(int i=0;i<xN;i++){
-              for(int j=0;j<yN;j++){
-                  flipped.SetPixel(xN-i-1, j, original.GetPixel(i,j));
-              }
-           }
-            flipped.Apply();
-         
-            return flipped;
-        }
-
-        private Texture2D GetCameraImage()
+        private void UpdateCameraImage()
         {
             // https://discussions.unity.com/t/mirror-flip-camera/56560/2
             // Altering the projection matrix disturbs how normal vectors are calculated
@@ -135,8 +123,9 @@ namespace ROS2
             int width = (int) CameraPixelWidth;
             int height = (int) CameraPixelHeight;
             Rect rect = new Rect(0, 0, width, height);
-            RenderTexture renderTexture = new RenderTexture(width, height, 24);
-            Texture2D screenShot = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            
+            renderTexture.name = "ROS Camera RenderTexture";
+            // Texture2D screenShot = new Texture2D(width, height, TextureFormat.RGBA32, false);
 
             // By setting targetTexture, we tell Unity to disable rendering to the screen (in theory, at least)
             camera.targetTexture = renderTexture;
@@ -146,15 +135,23 @@ namespace ROS2
             screenShot.ReadPixels(rect, 0, 0);
 
             camera.targetTexture = null;
+
             RenderTexture.active = null;
+            renderTexture = null;
 
             Destroy(renderTexture);
-            renderTexture = null;
+
+            // DestroyImmediate(renderTexture);
+            // Texture2D[] textures = FindObjectsOfType<Texture2D>();
+            // foreach (Texture2D tx in textures)
+            // {
+            //     Destroy(tx);
+            // }
 
             // Reset this.
             GL.invertCulling = false;
 
-            return screenShot;
+            return;
         }
     }
 
