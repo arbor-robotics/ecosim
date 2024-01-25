@@ -262,6 +262,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
         type: 3}
+      propertyPath: nodeName
+      value: camera_front_right
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
       propertyPath: TopicName
       value: /camera_front_right
       objectReference: {fileID: 0}
@@ -335,6 +340,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ROS Camera, Front Right
       objectReference: {fileID: 0}
+    - target: {fileID: 8201157730410575406, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -364,7 +374,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &536864850
 Transform:
   m_ObjectHideFlags: 0
@@ -392,10 +402,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fbc5d997d525f3ea9c2173653a6522f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NodeName: CameraPublisherFrontLeft
-  CameraName: front_left
-  CameraPixelWidth: 800
-  CameraPixelHeight: 600
+  nodeName: camera_front_left
+  cameraName: 
+  cameraPixelWidth: 800
+  cameraPixelHeight: 600
 --- !u!114 &536864852
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -807,7 +817,17 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
         type: 3}
+      propertyPath: nodeName
+      value: camera_front_center
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
       propertyPath: CameraName
+      value: front_center
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: cameraName
       value: front_center
       objectReference: {fileID: 0}
     - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
