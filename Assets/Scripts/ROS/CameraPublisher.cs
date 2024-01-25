@@ -13,9 +13,10 @@ namespace ROS2
         private ROS2UnityComponent ros2Unity;
         private ROS2Node ros2Node;
         private IPublisher<sensor_msgs.msg.Image> image_pub;
+        private IPublisher<sensor_msgs.msg.CameraInfo> info_pub;
 
         public string NodeName;
-        public string TopicName;
+        public string CameraName;
         public uint CameraPixelWidth = 800;
         public uint CameraPixelHeight = 600;
 
@@ -48,7 +49,8 @@ namespace ROS2
                 {
                     // Set up the node and publisher.
                     ros2Node = ros2Unity.CreateNode(NodeName);
-                    image_pub = ros2Node.CreatePublisher<sensor_msgs.msg.Image>(TopicName);
+                    image_pub = ros2Node.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + CameraName + "/image_color");
+                    info_pub = ros2Node.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + CameraName + "/camera_info");
                 }
 
                 Texture2D tex = GetCameraImage();
@@ -59,23 +61,51 @@ namespace ROS2
 
                 // Debug.Log(tex.GetPixelData<byte>(0).Length);
 
-                // Publish to ROS
+                // Publish Image to ROS
                 sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
-
                 byte[] image_data = tex.GetPixelData<byte>(0).ToArray();
-
-
-                // Array.Reverse(image_data);
                 image_msg.Data = image_data;
                 image_msg.Encoding = "rgba8";
                 image_msg.Height = CameraPixelHeight;
                 image_msg.Width = CameraPixelWidth;
-
                 image_pub.Publish(image_msg);
+
+                // Now public CameraInfo
+                sensor_msgs.msg.CameraInfo info_msg = GetCameraInfo();
+                info_pub.Publish(info_msg);
 
                 // Write the returned byte array to a file in the project folder
                 // File.WriteAllBytes($"/home/main/{NodeName}.jpg", bytes);
             }
+        }
+
+        /// <summary>
+        /// Returns a Time object with the current game time.
+        /// </summary>
+        /// <returns>Time object with the current game time</returns>
+        builtin_interfaces.msg.Time GetStamp() {
+            builtin_interfaces.msg.Time stamp = new builtin_interfaces.msg.Time();
+
+            int sec = (int) Math.Floor(Time.time);
+
+            uint nanosec = (uint) ((Time.time - sec) * 1e9);
+
+            stamp.Sec = sec;
+            stamp.Nanosec = nanosec;
+
+            return stamp;
+        }
+
+        /// <summary>
+        /// Generate a CameraInfo object and return it.
+        /// </summary>
+        /// <returns>CameraInfo object matching current camera properties</returns>
+        sensor_msgs.msg.CameraInfo GetCameraInfo() {
+            sensor_msgs.msg.CameraInfo info_msg = new sensor_msgs.msg.CameraInfo();
+            info_msg.Header.Frame_id = CameraName;
+            info_msg.Header.Stamp = GetStamp();
+
+            return info_msg;
         }
 
         Texture2D FlipTexture(Texture2D original){

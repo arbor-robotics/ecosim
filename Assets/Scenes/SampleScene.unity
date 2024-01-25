@@ -265,6 +265,16 @@ PrefabInstance:
       propertyPath: TopicName
       value: /camera_front_right
       objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: CameraName
+      value: front_right
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: TopicPrefix
+      value: /camera/front_right/
+      objectReference: {fileID: 0}
     - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -383,7 +393,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NodeName: CameraPublisherFrontLeft
-  TopicName: /camera_front_left
+  CameraName: front_left
   CameraPixelWidth: 800
   CameraPixelHeight: 600
 --- !u!114 &536864852
@@ -795,6 +805,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 558044793}
     m_Modifications:
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: CameraName
+      value: front_center
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: TopicPrefix
+      value: /camera/front_center/
+      objectReference: {fileID: 0}
     - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
         type: 3}
       propertyPath: m_LocalPosition.x
