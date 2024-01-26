@@ -2,10 +2,13 @@ using UnityEngine;
 using System.IO;
 using System;
 using std_msgs.msg;
+using geometry_msgs.msg;
+using sensor_msgs.msg;
 using System.Linq;
 using System.Threading.Tasks;
 using Unity.Collections;
 using System.Security.Cryptography;
+using Unity.Mathematics;
 
 namespace ROS2
 {
@@ -14,17 +17,23 @@ namespace ROS2
         // Start is called before the first frame update
         private ROS2UnityComponent rosUnityComponent;
         private ROS2Node rosNode;
-        private IPublisher<geometry_msgs.msg.PoseWithCovarianceStamped> posePublisher;
-        private IPublisher<sensor_msgs.msg.NavSatFix> navSatFixPublisher;
+        private IPublisher<PoseWithCovarianceStamped> posePublisher;
+        private IPublisher<NavSatFix> navSatFixPublisher;
         // TODO: Transform broadcaster
+
+        PoseWithCovarianceStamped currentPose;
+        NavSatFix currentFix;
 
         public string nodeName;
         public string poseTopic;
         public string navSatFixTopic;
+        public string mapFrameId = "map";
 
         void Start()
         {
             rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
+
+            currentPose = new PoseWithCovarianceStamped();
         }
 
         void Update()
@@ -35,12 +44,42 @@ namespace ROS2
                 {
                     // Set up the node and publisher.
                     rosNode = rosUnityComponent.CreateNode(nodeName);
-                    posePublisher = rosNode.CreateSensorPublisher<geometry_msgs.msg.PoseWithCovarianceStamped>(poseTopic);
-                    navSatFixPublisher = rosNode.CreateSensorPublisher<sensor_msgs.msg.NavSatFix>(navSatFixTopic);
+                    posePublisher = rosNode.CreateSensorPublisher<PoseWithCovarianceStamped>(poseTopic);
+                    navSatFixPublisher = rosNode.CreateSensorPublisher<NavSatFix>(navSatFixTopic);
                 }
-                
+
+                // Get the current pose
+                currentPose.Header = GetHeader();
+
+
+                // Publish everything
+                // posePublisher.Publish(currentPose);
             }
             
+        }
+
+        Header GetHeader()
+        {
+            Header header = new Header
+            {
+                Frame_id = mapFrameId,
+                Stamp = GetStamp()
+            };
+
+            return header;
+        }
+
+        builtin_interfaces.msg.Time GetStamp() {
+            builtin_interfaces.msg.Time stamp = new builtin_interfaces.msg.Time();
+            
+            float currentTime = Time.time;
+            int secs = (int) math.floor(currentTime);
+            uint nanos = (uint) ((currentTime - secs) * 1e9);
+
+            stamp.Sec = secs;
+            stamp.Nanosec = nanos;
+
+            return stamp;
         }
 
     }
