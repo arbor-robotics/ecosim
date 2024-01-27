@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using System.Security.Cryptography;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 
 namespace ROS2
 {
@@ -23,6 +24,7 @@ namespace ROS2
 
         PoseWithCovarianceStamped currentPose;
         NavSatFix currentFix;
+        UnityEngine.Transform mapOrigin;
 
         public string nodeName;
         public string poseTopic;
@@ -33,6 +35,10 @@ namespace ROS2
         {
             rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
 
+            // Get the pose of our map's reference point. In our case,
+            // this is a statue. TODO: Parameterize this.
+            GameObject referenceObject = GameObject.FindGameObjectWithTag("MapFrameOrigin");
+            mapOrigin = referenceObject.transform;
         }
 
         void Update()
@@ -54,11 +60,13 @@ namespace ROS2
                 // Get the current pose
                 currentPose.Header = GetHeader();
 
+                // var diff = transform
+
                 currentPose.Pose.Pose.Position = new Point
                 {
-                    X = transform.position.x,
-                    Y = transform.position.y,
-                    Z = transform.position.z
+                    X = transform.position.x - mapOrigin.position.x,
+                    Y = transform.position.y - mapOrigin.position.y,
+                    Z = transform.position.z - mapOrigin.position.z
                 };
 
                 currentPose.Pose.Pose.Orientation = new geometry_msgs.msg.Quaternion
@@ -69,12 +77,14 @@ namespace ROS2
                     Z = transform.rotation.z
                 };
 
+                // Quaternion relative = Quaternion.Inverse(a) * b;
+
                 // TODO: Add covariance: currentPose.Pose.Covariance = ...
 
                 // Publish everything
                 posePublisher.Publish(currentPose);
             }
-            
+
         }
 
         Header GetHeader()
@@ -88,12 +98,13 @@ namespace ROS2
             return header;
         }
 
-        builtin_interfaces.msg.Time GetStamp() {
+        builtin_interfaces.msg.Time GetStamp()
+        {
             builtin_interfaces.msg.Time stamp = new builtin_interfaces.msg.Time();
-            
+
             float currentTime = Time.time;
-            int secs = (int) math.floor(currentTime);
-            uint nanos = (uint) ((currentTime - secs) * 1e9);
+            int secs = (int)math.floor(currentTime);
+            uint nanos = (uint)((currentTime - secs) * 1e9);
 
             stamp.Sec = secs;
             stamp.Nanosec = nanos;
