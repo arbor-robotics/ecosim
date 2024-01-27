@@ -64,9 +64,9 @@ namespace ROS2
 
                 currentPose.Pose.Pose.Position = new Point
                 {
-                    X = transform.position.x - mapOrigin.position.x,
-                    Y = transform.position.y - mapOrigin.position.y,
-                    Z = transform.position.z - mapOrigin.position.z
+                    X = transform.position.z - mapOrigin.position.z, // Forward is x in ROS, z in Unity
+                    Y = -1 * (transform.position.x - mapOrigin.position.x), // Left is y in ROS, -x in Unity
+                    Z = transform.position.y - mapOrigin.position.y // Up is z in ROS, y in Unity
                 };
 
                 currentPose.Pose.Pose.Orientation = new geometry_msgs.msg.Quaternion
