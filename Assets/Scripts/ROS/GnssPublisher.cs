@@ -33,7 +33,6 @@ namespace ROS2
         {
             rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
 
-            currentPose = new PoseWithCovarianceStamped();
         }
 
         void Update()
@@ -46,14 +45,34 @@ namespace ROS2
                     rosNode = rosUnityComponent.CreateNode(nodeName);
                     posePublisher = rosNode.CreateSensorPublisher<PoseWithCovarianceStamped>(poseTopic);
                     navSatFixPublisher = rosNode.CreateSensorPublisher<NavSatFix>(navSatFixTopic);
+
+                    // Messages shouldn't be instantiated before the ROS node is created.
+                    // https://github.com/RobotecAI/ros2-for-unity/issues/53#issuecomment-1418680445
+                    currentPose = new PoseWithCovarianceStamped();
                 }
 
                 // Get the current pose
                 currentPose.Header = GetHeader();
 
+                currentPose.Pose.Pose.Position = new Point
+                {
+                    X = transform.position.x,
+                    Y = transform.position.y,
+                    Z = transform.position.z
+                };
+
+                currentPose.Pose.Pose.Orientation = new geometry_msgs.msg.Quaternion
+                {
+                    W = transform.rotation.w,
+                    X = transform.rotation.x,
+                    Y = transform.rotation.y,
+                    Z = transform.rotation.z
+                };
+
+                // TODO: Add covariance: currentPose.Pose.Covariance = ...
 
                 // Publish everything
-                // posePublisher.Publish(currentPose);
+                posePublisher.Publish(currentPose);
             }
             
         }
