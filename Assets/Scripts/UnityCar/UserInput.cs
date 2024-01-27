@@ -20,7 +20,13 @@ namespace UnityCar
 
         public float ControllerInputY
         {
-            get { return controllerInputY; }
+            get
+            {
+                if (controllerInputY == 0)
+                    return -1f;
+                else
+                    return controllerInputY;
+            }
         }
 
         public float ControllerInputReverse
