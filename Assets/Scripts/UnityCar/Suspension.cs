@@ -16,12 +16,12 @@ namespace UnityCar
         [SerializeField] private float suspDamperRear = 1200.0f;
         [SerializeField] private float fARBe = 0.2f;
         [SerializeField] private float rARBe = 0.2f;
-        [SerializeField] private float frontBumperFAxleDistance = 1.0f;
-        [SerializeField] private float frontBumperRAxleDistance = 4.0f;
-        [SerializeField] private float trackFront = 1.6f;
-        [SerializeField] private float trackRear = 1.6f;
-        [SerializeField] private float rollingRadiusFront = 0.335f;
-        [SerializeField] private float rollingRadiusRear = 0.335f;
+        [SerializeField] private float frontBumperFAxleDistance = -0.46f;
+        [SerializeField] private float frontBumperRAxleDistance = 0.46f;
+        [SerializeField] private float trackFront = 1.08f;
+        [SerializeField] private float trackRear = 1.08f;
+        [SerializeField] private float rollingRadiusFront = -0.12f;
+        [SerializeField] private float rollingRadiusRear = -0.12f;
         [SerializeField] private float unsprungMassFront = 20.0f;
         [SerializeField] private float unsprungMassRear = 20.0f;
 
