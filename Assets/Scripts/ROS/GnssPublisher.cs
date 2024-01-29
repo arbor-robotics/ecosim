@@ -38,6 +38,11 @@ namespace ROS2
             // Get the pose of our map's reference point. In our case,
             // this is a statue. TODO: Parameterize this.
             GameObject referenceObject = GameObject.FindGameObjectWithTag("MapFrameOrigin");
+
+            if (!referenceObject) {
+                Debug.LogError("Could not locate map origin. Is your reference point tagged with MapFrameOrigin?");
+            }
+
             mapOrigin = referenceObject.transform;
         }
 
