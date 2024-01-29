@@ -71,15 +71,17 @@ namespace ROS2
                 {
                     X = transform.position.z - mapOrigin.position.z, // Forward is x in ROS, z in Unity
                     Y = -1 * (transform.position.x - mapOrigin.position.x), // Left is y in ROS, -x in Unity
-                    Z = transform.position.y - mapOrigin.position.y // Up is z in ROS, y in Unity
+                    // Z = mapOrigin.position.y - transform.position.y  // Up is z in ROS, y in Unity
+                    Z = 0f // TODO: Add support for elevation!!
                 };
 
+                UnityEngine.Quaternion currentOrientation = transform.rotation.Unity2Ros();
                 currentPose.Pose.Pose.Orientation = new geometry_msgs.msg.Quaternion
                 {
-                    W = transform.rotation.w,
-                    X = transform.rotation.x,
-                    Y = transform.rotation.y,
-                    Z = transform.rotation.z
+                    W = currentOrientation.w,
+                    X = currentOrientation.x,
+                    Y = currentOrientation.y,
+                    Z = currentOrientation.z
                 };
 
                 // Quaternion relative = Quaternion.Inverse(a) * b;
