@@ -937,7 +937,8 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: d7d87fb58bb72920885e4bffc94d26f1, type: 2}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 65702495048144492, guid: ec23a2f863253d062be2a0711a1bcdca, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ec23a2f863253d062be2a0711a1bcdca, type: 3}
@@ -1614,7 +1615,7 @@ GameObject:
   - component: {fileID: 1978130051}
   m_Layer: 0
   m_Name: StatuePoint
-  m_TagString: Untagged
+  m_TagString: MapFrameOrigin
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
