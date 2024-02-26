@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18029113, g: 0.22572407, b: 0.3069303, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028328, g: 0.22571328, b: 0.3069218, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -833,6 +833,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feab04ad06492965492b3edc6423aa53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &558044795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558044782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66870db239a450fc2af2a42c9aca66ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nodeName: vel_listener
+  cmdTopic: /cmd_vel
 --- !u!1001 &572966305
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -937,7 +951,8 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: d7d87fb58bb72920885e4bffc94d26f1, type: 2}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 65702495048144492, guid: ec23a2f863253d062be2a0711a1bcdca, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ec23a2f863253d062be2a0711a1bcdca, type: 3}
@@ -1957,6 +1972,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 558044794}
+    - targetCorrespondingSourceObject: {fileID: 2002406086940223288, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 558044795}
   m_SourcePrefab: {fileID: 100100000, guid: 037f382966238505981e248ff40c0781, type: 3}
 --- !u!4 &9145022647598122545 stripped
 Transform:

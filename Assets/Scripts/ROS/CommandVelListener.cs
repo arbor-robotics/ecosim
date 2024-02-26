@@ -15,6 +15,9 @@ namespace ROS2
 {
     public class CommandVelListener : MonoBehaviour
     {
+
+        private WheelCollider[] wC;
+
         // Start is called before the first frame update
         private ROS2UnityComponent rosUnityComponent;
         private ROS2Node rosNode;
@@ -34,15 +37,8 @@ namespace ROS2
         {
             rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
 
-            // Get the pose of our map's reference point. In our case,
-            // this is a statue. TODO: Parameterize this.
-            GameObject referenceObject = GameObject.FindGameObjectWithTag("MapFrameOrigin");
-
-            if (!referenceObject) {
-                Debug.LogError("Could not locate map origin. Is your reference point tagged with MapFrameOrigin?");
-            }
-
-            mapOrigin = referenceObject.transform;
+            // Find all WheelCollider objects as children of this object.
+            wC = gameObject.GetComponentsInChildren<WheelCollider>();
         }
 
         void Update()
@@ -56,17 +52,8 @@ namespace ROS2
                     
                     commandVelSub =  rosNode.CreateSubscription<TwistStamped>(
                                     "/cmd_vel", commandVelCB);
-                    
-
-
-                    // Messages shouldn't be instantiated before the ROS node is created.
-                    // https://github.com/RobotecAI/ros2-for-unity/issues/53#issuecomment-1418680445
-                    currentPose = new PoseWithCovarianceStamped();
-                }
-
-                
+                }   
             }
-
         }
 
        
@@ -86,11 +73,13 @@ namespace ROS2
         }
 
         void commandVelCB(TwistStamped msg){
-            Debug.Log("HelloWorld");
+            Debug.Log(msg.Twist.Linear.X); // m/s
+            Debug.Log(msg.Twist.Angular.Z); // rad/s
+            Debug.Log("Subscriber message");
+
+            // wC[0].brakeTorque = something
+            // wC[0].engineTorque = something
+            // wC[0].steerAngle = something
         }
-
     }
-
-    
-
 }  // namespace ROS2
