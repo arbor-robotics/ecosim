@@ -23,7 +23,7 @@ namespace UnityCar
             get
             {
                 if (controllerInputY == 0)
-                    return -1f;
+                    return 0f;
                 else
                     return controllerInputY;
             }

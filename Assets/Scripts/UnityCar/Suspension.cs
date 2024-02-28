@@ -20,8 +20,8 @@ namespace UnityCar
         [SerializeField] private float frontBumperRAxleDistance = 0.46f;
         [SerializeField] private float trackFront = 1.08f;
         [SerializeField] private float trackRear = 1.08f;
-        [SerializeField] private float rollingRadiusFront = -0.12f;
-        [SerializeField] private float rollingRadiusRear = -0.12f;
+        [SerializeField] private float rollingRadiusFront = -0.12f; //-0.12f
+        [SerializeField] private float rollingRadiusRear = -0.12f; //-0.12f
         [SerializeField] private float unsprungMassFront = 20.0f;
         [SerializeField] private float unsprungMassRear = 20.0f;
 
@@ -65,7 +65,7 @@ namespace UnityCar
                 wC[i].ConfigureVehicleSubsteps(30, 8, 20);
                 if (i < 2)
                 {
-                    wC[i].radius = rollingRadiusRear;
+                    wC[i].radius = 0.59f;
                     wC[i].mass = unsprungMassRear;
                     wC[i].center = new Vector3(0.0f, suspDisplacementRangeRear * (1.0f - targetPositionRear), 0.0f);
                     wC[i].suspensionDistance = suspDisplacementRangeRear;
@@ -75,7 +75,7 @@ namespace UnityCar
                 }
                 else
                 {
-                    wC[i].radius = rollingRadiusFront;
+                    wC[i].radius = 0.59f;
                     wC[i].mass = unsprungMassFront;
                     wC[i].center = new Vector3(0.0f, suspDisplacementRangeFront * (1.0f - targetPositionFront), 0.0f);
                     wC[i].suspensionDistance = suspDisplacementRangeFront;
@@ -89,13 +89,13 @@ namespace UnityCar
             // RL RR FL FR
             wC[0].gameObject.transform.localPosition = new Vector3(trackRear / -2.0f, rollingRadiusRear, -frontBumperRAxleDistance);
             wC[1].gameObject.transform.localPosition = new Vector3(trackRear / 2.0f, rollingRadiusRear, -frontBumperRAxleDistance);
-            wC[2].gameObject.transform.localPosition = new Vector3(trackFront / -2.0f, rollingRadiusFront, -frontBumperFAxleDistance);
-            wC[3].gameObject.transform.localPosition = new Vector3(trackFront / 2.0f, rollingRadiusFront, -frontBumperFAxleDistance);
+            wC[2].gameObject.transform.localPosition = new Vector3(trackFront / -2.0f, rollingRadiusFront, -frontBumperFAxleDistance - 1f);
+            wC[3].gameObject.transform.localPosition = new Vector3(trackFront / 2.0f, rollingRadiusFront, -frontBumperFAxleDistance - 1f);
 
             // calculate static corner loads
             staticCornerLoad = new float[4];
             // calculate CoG from front axle (care sign convention)
-            float frontAxleToCoG = Mathf.Abs(rB.centerOfMass.z) - frontBumperFAxleDistance;
+            float frontAxleToCoG = Mathf.Abs(rB.centerOfMass.z) - frontBumperFAxleDistance -1f;
             // calcualate corner mass for front and rear
             staticCornerLoad[0] = frontAxleToCoG / wheelBase * rB.mass / 2.0f * Physics.gravity.y;
             staticCornerLoad[1] = staticCornerLoad[0];
