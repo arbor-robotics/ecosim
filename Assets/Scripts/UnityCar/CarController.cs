@@ -52,7 +52,7 @@ namespace UnityCar
             wC = gameObject.GetComponentsInChildren<WheelCollider>();
             // Get and configure the vehicle rigidbody
             rB = GetComponent<Rigidbody>();
-            rB.mass = mass;
+            rB.mass = 800;
             rB.centerOfMass = coG;
             rB.inertiaTensor = inertiaTensor;
             rB.isKinematic = false;
@@ -84,8 +84,8 @@ namespace UnityCar
 
             // update steering angle due to input, correct for ackermann and apply steering (if we have a steering script)
             steerAngle = steering.SteerAngle(vel, inputX, steerAngle);
-            wC[2].steerAngle = steering.AckerAdjusted(steerAngle, suspension.GetWheelBase, suspension.GetTrackFront, true);
-            wC[3].steerAngle = steering.AckerAdjusted(steerAngle, suspension.GetWheelBase, suspension.GetTrackFront, false);
+            //wC[2].steerAngle = steering.AckerAdjusted(steerAngle, suspension.GetWheelBase, suspension.GetTrackFront, true);
+            //wC[3].steerAngle = steering.AckerAdjusted(steerAngle, suspension.GetWheelBase, suspension.GetTrackFront, false);
 
 
             // update lateral load transfer from anti-roll bars (sway bars)
@@ -94,19 +94,40 @@ namespace UnityCar
             // if automatic, select gear appropriate for vehicle speed (unless reverse requested)
             if (transmission.GetAutomatic)
             {
-                if (Input.GetKey(KeyCode.R)) transmission.SelectReverse();
+                if (inputY < 0f) transmission.SelectReverse();
                 else transmission.SetGear(suspension.GetNoSlipWheelRPM(vel), engine.GetEngineRPMMaxPower);
             }
+            float original_inputY = 1*inputY;
+
+            if (inputY == 0)
+            {
+                inputY = -1;
+            }
+            else { inputY = Math.Abs(inputY); }
 
             // update engine rpm and available torque
             float transmissionRatio = transmission.GetTransmissionRatio();
             float engineClutchLockRPM = transmission.GetEngineClutchLockRPM;
-            engine.UpdateEngineSpeedRPM(suspension.GetNoSlipWheelRPM(vel), inputY, transmissionRatio, engineClutchLockRPM);
+            engine.UpdateEngineSpeedRPM(suspension.GetNoSlipWheelRPM(vel), (inputY), transmissionRatio, engineClutchLockRPM);
             float engineTorque = engine.GetMaxEngineTorque();
 
             // get requested engine torque
-            if (inputY > 0.2f) engineTorque *= inputY;
-            else engineTorque = 0.0f;
+            
+            if (inputX != 0 && original_inputY == 0)
+            {
+                engine.UpdateEngineSpeedRPM(suspension.GetNoSlipWheelRPM(vel), Math.Abs(inputX), transmissionRatio, engineClutchLockRPM);
+                engineTorque = engine.GetMaxEngineTorque();
+                engineTorque *= Math.Abs(inputX);
+            }
+            else if (original_inputY != 0f && Math.Abs(inputY) < 0.2f)
+            {
+                engineTorque = 0;
+            }
+            else if (inputY != 0f)
+            {
+                engineTorque *= (inputY);
+            }
+
 
             // get requested wheel torques
             float[] wheelTorques = transmission.GetWheelTorques(engineTorque);
@@ -115,7 +136,11 @@ namespace UnityCar
             // if you want to add a traction control module, this would be a good place to use it
 
             // get requested brake torques
-            float[] brakeTorques = brakes.GetBrakeTorques(inputY);
+            float[] brakeTorques = brakes.GetBrakeTorques((inputY));
+            if (original_inputY == 0 && inputX != 0)
+            {
+                brakeTorques = brakes.GetBrakeTorques(Math.Abs(inputX));
+            }
 
             // if handbrake is on, brake rear wheels
             if (inputH > 0.1f) brakes.ApplyHandbrake(brakeTorques);
@@ -134,10 +159,55 @@ namespace UnityCar
             // update brake and motor torques on wheel colliders
             // RL RR FL FR
             // initialise all to 0.0f
-            for (int i = 0; i < 4; i++)
+            if (inputX == 0)
             {
-                wC[i].brakeTorque = brakeTorques[i];
-                wC[i].motorTorque = wheelTorques[i];
+                for (int i = 0; i < 4; i++)
+                {
+                    wC[i].brakeTorque = brakeTorques[i];
+                    wC[i].motorTorque = wheelTorques[i];
+                }
+            }
+            else if ((inputX < 0f || inputX > 0f) && original_inputY == 0f)
+            {
+                int dir;
+                if (inputX > 0f) { dir = 1; }
+                else { dir = -1; }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int wheel = i % 2;
+                    if (wheel == 0)
+                    {
+                        wC[i].brakeTorque = dir * brakeTorques[i];
+                        wC[i].motorTorque = dir * wheelTorques[i];
+                    }
+                    else
+                    {
+                        wC[i].brakeTorque = -dir * brakeTorques[i];
+                        wC[i].motorTorque = -dir * wheelTorques[i];
+                    }
+                }
+            }
+            else if ((inputX < 0f || inputX > 0f) && original_inputY != 0f)
+            {
+                int dir;
+                if (inputX > 0f) { dir = 1; }
+                else { dir = -1; }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int wheel = i % 2;
+                    if (wheel == 0)
+                    {
+                        wC[i].brakeTorque = (brakeTorques[i]*1/2) + (dir * brakeTorques[i])/2;
+                        wC[i].motorTorque = (wheelTorques[i]*1/2) + (dir * wheelTorques[i])/2;
+                    }
+                    else
+                    {
+                        wC[i].brakeTorque = (brakeTorques[i]*1/2) + (-dir * brakeTorques[i])/2;
+                        wC[i].motorTorque = (wheelTorques[i] *1/2) + (-dir * wheelTorques[i])/2;
+                    }
+                }
             }
 
         }

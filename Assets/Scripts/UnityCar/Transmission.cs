@@ -32,7 +32,7 @@ namespace UnityCar
             RWD = 2,
             FourWD = 4
         }
-        [SerializeField] private DrivenWheels drive = DrivenWheels.RWD;
+        [SerializeField] private DrivenWheels drive = DrivenWheels.FourWD;
         [SerializeField] private float fourWDFrtTorque = 0.4f;
 
         private int gearCurrent = 1;
