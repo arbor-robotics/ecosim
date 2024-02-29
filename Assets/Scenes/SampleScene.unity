@@ -834,6 +834,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feab04ad06492965492b3edc6423aa53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &558044805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 558044782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a534b912d2d758b379469d5b65a15a9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nodeName: motion_command_listener
+  cmdTopic: /cmd_vel
 --- !u!1001 &572966305
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1832,6 +1846,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 225312713314715279, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 276664248845225396, guid: 037f382966238505981e248ff40c0781,
         type: 3}
       propertyPath: m_Radius
@@ -1897,6 +1916,16 @@ PrefabInstance:
       propertyPath: m_SidewaysFriction.m_AsymptoteValue
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 623703612799175684, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 977627837103534750, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1210930283499383430, guid: 037f382966238505981e248ff40c0781,
         type: 3}
       propertyPath: m_Radius
@@ -1957,6 +1986,11 @@ PrefabInstance:
       propertyPath: m_SidewaysFriction.m_AsymptoteValue
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1379366395543874709, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1821400851765283221, guid: 037f382966238505981e248ff40c0781,
         type: 3}
       propertyPath: tyreFrictionRear
@@ -1995,6 +2029,11 @@ PrefabInstance:
     - target: {fileID: 2137516064728198139, guid: 037f382966238505981e248ff40c0781,
         type: 3}
       propertyPath: m_projectionMatrixMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2863762982946188381, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2869264191610544856, guid: 037f382966238505981e248ff40c0781,
@@ -2182,6 +2221,11 @@ PrefabInstance:
       propertyPath: m_SidewaysFriction.m_AsymptoteValue
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6113895914622061369, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6215631444008617199, guid: 037f382966238505981e248ff40c0781,
         type: 3}
       propertyPath: mass
@@ -2264,6 +2308,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 558044794}
+    - targetCorrespondingSourceObject: {fileID: 2002406086940223288, guid: 037f382966238505981e248ff40c0781,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 558044805}
   m_SourcePrefab: {fileID: 100100000, guid: 037f382966238505981e248ff40c0781, type: 3}
 --- !u!4 &9145022647598122545 stripped
 Transform:
