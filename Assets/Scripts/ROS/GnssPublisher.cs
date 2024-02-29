@@ -64,10 +64,13 @@ void Update()
 
 		// var diff = transform
 
+		// TODO: Dejank this! WSH
 		currentPose.Pose.Pose.Position = new Point
 		{
-			X = transform.position.z - mapOrigin.position.z, // Forward is x in ROS, z in Unity
-			Y = -1 * (transform.position.x - mapOrigin.position.x), // Left is y in ROS, -x in Unity
+			// X = transform.position.z - mapOrigin.position.z, // Forward is x in ROS, z in Unity
+			X = transform.position.x - 423.11,
+			// Y = -1 * (transform.position.x - mapOrigin.position.x), // Left is y in ROS, -x in Unity
+			Y = transform.position.z - 661.07,
 			// Z = mapOrigin.position.y - transform.position.y  // Up is z in ROS, y in Unity
 			Z = 0f // TODO: Add support for elevation!!
 		};
