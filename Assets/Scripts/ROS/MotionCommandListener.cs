@@ -37,7 +37,16 @@ private float angular_twist_z;
 public float ControllerInputX
 {
 	get {
-		return controllerInputX;
+		// BANG BANG BABY
+		if (controllerInputX > 0.3f)
+			return 1f;
+		else if (controllerInputX < -0.3f)
+			return -1f;
+		else if (controllerInputX > 0.1f)
+			return 0.5f;
+		else if (controllerInputX < -0.1f)
+			return -.5f;
+		else return 0f;
 	}
 }
 
@@ -45,7 +54,15 @@ public float ControllerInputY
 {
 	get
 	{
-		return controllerInputY;
+		if (controllerInputY > 0.3f)
+			return .5f;
+		else if (controllerInputY < -0.3f)
+			return -.5f;
+		else if (controllerInputY > 0.1f)
+			return 0.3f;
+		else if (controllerInputY < -0.1f)
+			return -.3f;
+		else return 0f;
 	}
 }
 
@@ -95,7 +112,7 @@ void Update()
 
 	// Unity requires us to get our velocity in the main thread-- that's here!
 	// Unity "z" is forward-- ROS's "x". Unity "y" is up-- ROS's "z"
-	current_forward_speed = GetComponent<Rigidbody>().velocity.z;
+	current_forward_speed = GetComponent<Rigidbody>().velocity.magnitude;
 
 	// Negate to make it right-handed
 	current_yaw_rate = -1*GetComponent<Rigidbody>().angularVelocity.y;
@@ -109,15 +126,28 @@ void setControllerInputs()
 	float linear_speed_error = linear_twist_x - current_forward_speed;
 	float yaw_rate_error = angular_twist_z - current_yaw_rate;
 	float Kp_linear = 4.0f;
-	float Kp_angular = 5.0f;
+	float Kp_angular = -8.0f;
 	float max_input_x = 5.0f;
 
-	controllerInputY = Math.Max(Math.Min(Kp_linear * linear_speed_error, 1.0f), -1f);
+	const float SPEED_LIMIT = 1.0f;
+
+	Debug.Log($"Speed: {current_forward_speed}");
+	if (current_forward_speed > SPEED_LIMIT)
+	{
+		Debug.Log("Coasting!");
+		controllerInputY = 0f;
+	}
+	else
+	{
+		controllerInputY = Math.Max(Math.Min(Kp_linear * linear_speed_error, 1.0f), 0);
+	}
+
+
 	controllerInputX = Math.Max(
 		Math.Min(
 			Kp_angular * yaw_rate_error,
 			max_input_x), -max_input_x);
-	Debug.Log($"Lin. E: {linear_speed_error}, Ang: {yaw_rate_error}");
+	// Debug.Log($"Lin. E: {linear_speed_error}, Ang: {yaw_rate_error}");
 }
 
 void commandVelCb(Twist msg)
