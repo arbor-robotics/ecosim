@@ -90,7 +90,7 @@ void FixedUpdate()
 		inputR = userInput.ControllerInputReverse;
 		inputH = userInput.ControllerInputHandBrake;
 	}
-	Debug.Log($"X: {inputX} // Y: {inputY}");
+	Debug.Log($"X: {inputX} // Y: {inputY} // R {inputR} // H {inputH}");
 
 	// calculate vehicle velocity in the forward direction
 	vel = transform.InverseTransformDirection(rB.velocity).z;
