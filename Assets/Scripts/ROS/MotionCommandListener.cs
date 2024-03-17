@@ -1,23 +1,19 @@
 using UnityEngine;
-using System.IO;
 using System;
-using std_msgs.msg;
 using geometry_msgs.msg;
 using sensor_msgs.msg;
-using System.Linq;
-using System.Threading.Tasks;
-using Unity.Collections;
-using System.Security.Cryptography;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 
 namespace ROS2
 {
+/// <summary>
+/// The main input to this class is Twist messages received by a ROS subscriber.
+/// The output is simulated user control commands, with are read by our UnityCar scripts.
+/// Recall that UnityCar listens for input through Unity's built-in user input system,
+/// which in turn checks for keyboard presses, gamepads, etc. This script basically
+/// acts as a virtual gamepad/keyboard, thanks to its ControllerInputX/Y getters.
+/// </summary>
 public class MotionCommandListener : MonoBehaviour
 {
-
-private WheelCollider wheel_rear_left, wheel_rear_right, wheel_front_left, wheel_front_right;
-private float torque_rl, torque_rr, torque_fl, torque_fr;
 
 // Start is called before the first frame update
 private ROS2UnityComponent rosUnityComponent;
@@ -34,9 +30,17 @@ private float controllerInputHandBrake;
 private float linear_twist_x;
 private float angular_twist_z;
 
+// ROS-specific params
+public string nodeName;
+public string cmdTopic;
+
+// Other params
+public float speedLimit = 1.0f;
+
 public float ControllerInputX
 {
-	get {
+	get
+	{
 		// BANG BANG BABY
 		if (controllerInputX > 0.3f)
 			return 1f;
@@ -76,24 +80,9 @@ public float ControllerInputHandBrake
 	get { return controllerInputHandBrake; }
 }
 
-
-PoseWithCovarianceStamped currentPose;
-NavSatFix currentFix;
-UnityEngine.Transform mapOrigin;
-
-public string nodeName;
-public string cmdTopic;
-
 void Start()
 {
 	rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
-
-	// Find all WheelCollider objects as children of this object.
-	wheel_rear_left = transform.Find("WC_RL").gameObject.GetComponent<WheelCollider>();
-	wheel_rear_right = transform.Find("WC_RR").gameObject.GetComponent<WheelCollider>();
-	wheel_front_left = transform.Find("WC_FL").gameObject.GetComponent<WheelCollider>();
-	wheel_front_right = transform.Find("WC_FR").gameObject.GetComponent<WheelCollider>();
-	// rigidbody = gameObject.GetComponent<Rigidbody>();
 }
 
 void Update()
@@ -105,7 +94,7 @@ void Update()
 			// Set up the node and subscriber.
 			rosNode = rosUnityComponent.CreateNode(nodeName);
 
-			commandVelSub =  rosNode.CreateSubscription<Twist>(
+			commandVelSub = rosNode.CreateSubscription<Twist>(
 				"/cmd_vel", commandVelCb);
 		}
 	}
@@ -115,12 +104,16 @@ void Update()
 	current_forward_speed = GetComponent<Rigidbody>().velocity.magnitude;
 
 	// Negate to make it right-handed
-	current_yaw_rate = -1*GetComponent<Rigidbody>().angularVelocity.y;
+	current_yaw_rate = -1 * GetComponent<Rigidbody>().angularVelocity.y;
 
 	// Unity also requires us to set motor torques in the main thread.
 	setControllerInputs();
 }
 
+/// <summary>
+/// Calculate the current error in linear and angular speed, then apply
+/// appropriate simulated user input to minimize the errors.
+/// </summary>
 void setControllerInputs()
 {
 	float linear_speed_error = linear_twist_x - current_forward_speed;
@@ -129,12 +122,10 @@ void setControllerInputs()
 	float Kp_angular = -8.0f;
 	float max_input_x = 5.0f;
 
-	const float SPEED_LIMIT = 1.0f;
-
-	Debug.Log($"Speed: {current_forward_speed}");
-	if (current_forward_speed > SPEED_LIMIT)
+	// Debug.Log($"Speed: {current_forward_speed}");
+	if (current_forward_speed > speedLimit)
 	{
-		Debug.Log("Coasting!");
+		// Debug.Log("Coasting!");
 		controllerInputY = 0f;
 	}
 	else
@@ -142,18 +133,20 @@ void setControllerInputs()
 		controllerInputY = Math.Max(Math.Min(Kp_linear * linear_speed_error, 1.0f), 0);
 	}
 
-
 	controllerInputX = Math.Max(
 		Math.Min(
 			Kp_angular * yaw_rate_error,
 			max_input_x), -max_input_x);
-	// Debug.Log($"Lin. E: {linear_speed_error}, Ang: {yaw_rate_error}");
 }
 
+/// <summary>
+/// Sets our target speeds from a given Twist message.
+/// </summary>
+/// <param name="msg">Twist message from subscriber</param>
 void commandVelCb(Twist msg)
 {
-	linear_twist_x = (float) msg.Linear.X;
-	angular_twist_z = (float) msg.Angular.Z;
+	linear_twist_x = (float)msg.Linear.X;
+	angular_twist_z = (float)msg.Angular.Z;
 }
 }
 }  // namespace ROS2
