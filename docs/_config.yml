@@ -1,0 +1,29 @@
+title: ArborSim
+description: A custom simulator for the Digital Steward, built in Unity.
+theme: just-the-docs
+
+color_scheme: arbor # see _sass/
+
+url: https://just-the-docs.github.io
+# logo: "/assets/images/arbor-logo.png"
+favicon_ico: "/assets/images/arbor-logo.png"
+
+math: mathjax
+
+callouts:
+  extra:
+    title: Extra Info
+    color: blue
+  important:
+    title: Important
+    color: yellow
+  warning:
+    title: Warning
+    color: red
+  new:
+    title: New
+    color: green
+
+aux_links:
+  "Github Repo":
+    - "https://github.com/arbor-robotics/Arbor-Sim"
