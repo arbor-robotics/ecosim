@@ -38,7 +38,7 @@ void Start()
 
 	// Get the pose of our map's reference point. In our case,
 	// this is a statue. TODO: Parameterize this.
-	GameObject referenceObject = GameObject.FindGameObjectWithTag("MapFrameOrigin");
+	GameObject referenceObject = GameObject.Find("MapFrameOrigin");
 
 	mapOrigin = referenceObject.transform;
 }
