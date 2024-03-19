@@ -116,6 +116,7 @@ void Update()
 /// </summary>
 void setControllerInputs()
 {
+	// TODO: Turn everything off once motion command is stale
 	float linear_speed_error = linear_twist_x - current_forward_speed;
 	float yaw_rate_error = angular_twist_z - current_yaw_rate;
 	float Kp_linear = 4.0f;
