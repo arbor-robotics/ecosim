@@ -43,6 +43,7 @@ namespace ROS2
 
             screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
             camera.targetTexture = renderTexture;
+            
         }
 
         /// <summary>
