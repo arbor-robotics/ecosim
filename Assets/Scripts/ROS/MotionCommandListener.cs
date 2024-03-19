@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using geometry_msgs.msg;
 using sensor_msgs.msg;
+using System.Runtime.CompilerServices;
 
 namespace ROS2
 {
@@ -34,13 +35,21 @@ private float angular_twist_z;
 public string nodeName;
 public string cmdTopic;
 
+// For measuring staleness
+private float lastTime = Time.time;
+private float currentTime = Time.time;
+
 // Other params
 public float speedLimit = 1.0f;
+public float stalenessToleranceSeconds = 0.1f;
 
 public float ControllerInputX
 {
 	get
 	{
+		if (currentTime - lastTime > stalenessToleranceSeconds) {
+			return 0f;
+		}
 		// BANG BANG BABY
 		if (controllerInputX > 0.3f)
 			return 1f;
@@ -58,6 +67,9 @@ public float ControllerInputY
 {
 	get
 	{
+		if (currentTime - lastTime > stalenessToleranceSeconds) {
+			return 0f;
+		}
 		if (controllerInputY > 0.3f)
 			return .5f;
 		else if (controllerInputY < -0.3f)
@@ -83,6 +95,7 @@ public float ControllerInputHandBrake
 void Start()
 {
 	rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
+
 }
 
 void Update()
@@ -108,6 +121,8 @@ void Update()
 
 	// Unity also requires us to set motor torques in the main thread.
 	setControllerInputs();
+
+	currentTime = Time.time;
 }
 
 /// <summary>
@@ -146,6 +161,8 @@ void setControllerInputs()
 /// <param name="msg">Twist message from subscriber</param>
 void commandVelCb(Twist msg)
 {
+	lastTime = currentTime;
+	Debug.Log($"{lastTime}");
 	linear_twist_x = (float)msg.Linear.X;
 	angular_twist_z = (float)msg.Angular.Z;
 }
