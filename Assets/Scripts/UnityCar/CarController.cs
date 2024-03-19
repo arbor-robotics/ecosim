@@ -83,7 +83,8 @@ void FixedUpdate()
 		inputY = rosInput.ControllerInputY;
 		inputR = rosInput.ControllerInputReverse;
 		inputH = rosInput.ControllerInputHandBrake;
-	} else if (userInput.enabled)
+	}
+	if (userInput.enabled && inputX == 0f && inputY == 0f)
 	{
 		inputX = userInput.ControllerInputX;
 		inputY = userInput.ControllerInputY;
