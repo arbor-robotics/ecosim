@@ -63,8 +63,8 @@ void Awake()
 	wC = gameObject.GetComponentsInChildren<WheelCollider>();
 	// Get and configure the vehicle rigidbody
 	rB = GetComponent<Rigidbody>();
-	rB.mass = 800;
-	rB.centerOfMass = coG;
+	// rB.mass = 800;
+	// rB.centerOfMass = coG;
 	rB.inertiaTensor = inertiaTensor;
 	rB.isKinematic = false;
 }
@@ -255,7 +255,7 @@ void Update()
 		transWheel.transform.position = wcPosition;
 
 
-		float offset = 0.4f;
+		float offset = 0.0f;
 		if (i % 2 == 0)
 			transWheel.transform.localPosition = new Vector3(transWheel.transform.localPosition.y- offset, transWheel.transform.localPosition.y, transWheel.transform.localPosition.z);
 		else
