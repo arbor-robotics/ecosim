@@ -43,23 +43,19 @@ private float currentTime = Time.time;
 public float speedLimit = 1.0f;
 public float stalenessToleranceSeconds = 0.1f;
 
+/// <summary>
+/// This is the equivalent to the Left/Right arrow keys.
+/// This turns the robot.
+/// </summary>
 public float ControllerInputX
 {
 	get
 	{
 		if (currentTime - lastTime > stalenessToleranceSeconds) {
 			return 0f;
+		} else {
+			return controllerInputX;
 		}
-		// BANG BANG BABY
-		if (controllerInputX > 0.3f)
-			return 1f;
-		else if (controllerInputX < -0.3f)
-			return -1f;
-		else if (controllerInputX > 0.1f)
-			return 0.5f;
-		else if (controllerInputX < -0.1f)
-			return -.5f;
-		else return 0f;
 	}
 }
 
@@ -133,10 +129,17 @@ void setControllerInputs()
 {
 	// TODO: Turn everything off once motion command is stale
 	float linear_speed_error = linear_twist_x - current_forward_speed;
+
+	// Debug.Log($"Current yr is {current_yaw_rate}");
+	// Debug.Log($"Target yr is  {angular_twist_z}");
+
 	float yaw_rate_error = angular_twist_z - current_yaw_rate;
 	float Kp_linear = 4.0f;
-	float Kp_angular = -8.0f;
-	float max_input_x = 5.0f;
+	float Kp_angular = -40.0f;
+
+	// This is the maximum x input from the "keyboard."
+	// In Unity, the max user input is 1.
+	float max_input_x = 1.0f;
 
 	// Debug.Log($"Speed: {current_forward_speed}");
 	if (current_forward_speed > speedLimit)
@@ -162,7 +165,6 @@ void setControllerInputs()
 void commandVelCb(Twist msg)
 {
 	lastTime = currentTime;
-	Debug.Log($"{lastTime}");
 	linear_twist_x = (float)msg.Linear.X;
 	angular_twist_z = (float)msg.Angular.Z;
 }

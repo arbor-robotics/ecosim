@@ -60,7 +60,7 @@ void Start()
 		awfcLat[i].extremumValue = 1f;
 		awfcLat[i].asymptoteSlip = 0.8f;
 		awfcLat[i].asymptoteValue = 2f;
-		awfcLat[i].stiffness = 1f;
+		awfcLat[i].stiffness = 10f;
 	}
 
 	// Assign the WFC data to the wheel colliders
