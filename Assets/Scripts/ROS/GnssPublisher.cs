@@ -112,11 +112,14 @@ Header GetHeader()
 
 builtin_interfaces.msg.Time GetStamp()
 {
+
+	System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+	double cur_time = (System.DateTime.UtcNow - epochStart).TotalSeconds;
 	builtin_interfaces.msg.Time stamp = new builtin_interfaces.msg.Time();
 
-	float currentTime = Time.time;
-	int secs = (int)math.floor(currentTime);
-	uint nanos = (uint)((currentTime - secs) * 1e9);
+	// float currentTime = Time.time;
+	int secs = (int)math.floor(cur_time);
+	uint nanos = (uint)((cur_time - secs) * 1e9);
 
 	stamp.Sec = secs;
 	stamp.Nanosec = nanos;

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2894.3696, g: 2949.7075, b: 2866.633, a: 1}
+  m_IndirectSpecularColor: {r: 2938.68, g: 2986.2603, b: 2882.2034, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1693,17 +1693,17 @@ PrefabInstance:
     - target: {fileID: 2373954859864240163, guid: f0b519d04fe759384a3fa6e856cae782,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.038
+      value: -0.06
       objectReference: {fileID: 0}
     - target: {fileID: 2373954859864240163, guid: f0b519d04fe759384a3fa6e856cae782,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.076
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 2373954859864240163, guid: f0b519d04fe759384a3fa6e856cae782,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.126
+      value: -0.14
       objectReference: {fileID: 0}
     - target: {fileID: 2882964399952058400, guid: f0b519d04fe759384a3fa6e856cae782,
         type: 3}
@@ -9246,10 +9246,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7506d8f9044609d82b1590c58e1b4928, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodeName: 
-  cmdTopic: 
-  speedLimit: 0
-  stalenessToleranceSeconds: 0
+  nodeName: naive_cmd_listener
+  cmdTopic: /cmd_vel
+  speedLimit: 2
+  stalenessToleranceSeconds: 0.1
 --- !u!1001 &1987837938
 PrefabInstance:
   m_ObjectHideFlags: 0
