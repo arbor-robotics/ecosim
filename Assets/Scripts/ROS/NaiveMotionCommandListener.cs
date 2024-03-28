@@ -38,12 +38,16 @@ public string nodeName;
 public string cmdTopic;
 
 // For measuring staleness
-private float lastTime = Time.time;
-private float currentTime = Time.time;
+private double lastTimeMessageReceived = getCurrentUnixTime();
+private double lastTimeVelocitiesUpdated = getCurrentUnixTime();
+private double currentTime = getCurrentUnixTime();
+
+[SerializeField] private float linearKp = 10000;
+[SerializeField] private float updatePeriodSeconds = 0.1f;
 
 // Other params
 public float speedLimit = 1.0f;
-public float stalenessToleranceSeconds = 0.1f;
+public float stalenessToleranceSeconds = 0.5f;
 
 /// <summary>
 /// This is the equivalent to the Left/Right arrow keys.
@@ -53,7 +57,7 @@ public float ControllerInputX
 {
 	get
 	{
-		if (currentTime - lastTime > stalenessToleranceSeconds) {
+		if (currentTime - lastTimeMessageReceived > stalenessToleranceSeconds) {
 			return 0f;
 		} else {
 			return controllerInputX;
@@ -61,11 +65,18 @@ public float ControllerInputX
 	}
 }
 
+static double getCurrentUnixTime()
+{
+	System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+	double cur_time = (System.DateTime.UtcNow - epochStart).TotalSeconds;
+	return cur_time;
+}
+
 public float ControllerInputY
 {
 	get
 	{
-		if (currentTime - lastTime > stalenessToleranceSeconds) {
+		if (currentTime - lastTimeMessageReceived > stalenessToleranceSeconds) {
 			return 0f;
 		}
 		if (controllerInputY > 0.3f)
@@ -120,7 +131,7 @@ void Update()
 	// Unity also requires us to set motor torques in the main thread.
 	setControllerInputs();
 
-	currentTime = Time.time;
+	currentTime = getCurrentUnixTime();
 }
 
 /// <summary>
@@ -129,25 +140,47 @@ void Update()
 /// </summary>
 void setControllerInputs()
 {
-	bool isStale = currentTime - lastTime < stalenessToleranceSeconds;
+	bool isStale = currentTime - lastTimeMessageReceived > stalenessToleranceSeconds;
+	bool isTooRecent = currentTime - lastTimeVelocitiesUpdated < updatePeriodSeconds;
 
-	if (isStale) {
-		linear_twist_x = 0f;
-		angular_twist_z = 0f;
+	if (isTooRecent) {
+		return;
 	}
+	if (isStale) {
+		Debug.Log($"Curr: {currentTime}, last: {lastTimeMessageReceived}");
+		Debug.Log($"Diff: {currentTime - lastTimeMessageReceived}");
+		return;
+	} else {
+		lastTimeVelocitiesUpdated = currentTime;
+	}
+
 
 	// From the docs: https://docs.unity3d.com/ScriptReference/Rigidbody-velocity.html
 	// "In most cases you should not modify the velocity directly, as this can result in
 	// unrealistic behaviour - use AddForce instead Do not set the velocity of an object
 	// every physics step, this will lead to unrealistic physics simulation."
 
+	float speedError = linear_twist_x - rigidbody.velocity.magnitude;
+
 	// Recall that ROS's "x" is Unity's "z," the forward direction.
+
+	float forwardForce = speedError * linearKp;
+
+	Debug.Log($"Curr speed: {rigidbody.velocity.magnitude}, error: {speedError}");
+
+	// rigidbody.AddForce(UnityEngine.Vector3.forward * speedError, mode: ForceMode.VelocityChange);
+
+	UnityEngine.Vector3 bottom = transform.position;
+	bottom.z -= 0.5f;
+
+	rigidbody.AddForceAtPosition(rigidbody.rotation * UnityEngine.Vector3.forward * speedError, position: bottom, mode: ForceMode.VelocityChange);
+
 	rigidbody.velocity = rigidbody.rotation * new UnityEngine.Vector3(0f, 0f, linear_twist_x);
 
 	// Recall that ROS's "z" is Unity's "y," the yaw direction.
 	rigidbody.angularVelocity = new UnityEngine.Vector3(0f, -1*angular_twist_z, 0f);
 
-	Debug.Log($"Setting linear x to {linear_twist_x}, yaw rate to {angular_twist_z}");
+	// Debug.Log($"Setting linear x to {linear_twist_x}, yaw rate to {angular_twist_z}");
 }
 
 /// <summary>
@@ -156,7 +189,7 @@ void setControllerInputs()
 /// <param name="msg">Twist message from subscriber</param>
 void commandVelCb(Twist msg)
 {
-	lastTime = currentTime;
+	lastTimeMessageReceived = currentTime;
 	linear_twist_x = (float)msg.Linear.X;
 	angular_twist_z = (float)msg.Angular.Z;
 }
