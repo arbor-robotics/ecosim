@@ -98,13 +98,13 @@ void FixedUpdate()
 
 	// calculate vehicle velocity in the forward direction
 	vel = transform.InverseTransformDirection(rigidbody.velocity).z;
-	float forwardSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
+	float currentForwardSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
 
-	Debug.Log(forwardSpeed);
+	Debug.Log(currentForwardSpeed);
 
 	// Calculate how close the car is to top speed
 	// as a number from zero to one
-	float speedFactor = Mathf.InverseLerp(0, maxSpeed, Math.Abs(forwardSpeed));
+	float speedFactor = Mathf.InverseLerp(0, maxSpeed, Math.Abs(currentForwardSpeed));
 
 	// Use that to calculate how much torque is available
 	// (zero torque at top speed)
@@ -119,7 +119,26 @@ void FixedUpdate()
 
 	float vInput = Input.GetAxis("Vertical");
 	float hInput = Input.GetAxis("Horizontal");
-	bool isAccelerating = Mathf.Sign(vInput) == Mathf.Sign(forwardSpeed);
+	float targetForwardSpeed; // m/s
+
+	if (false)
+	{
+		// ROS message here!
+	} else {
+		targetForwardSpeed = vInput * maxSpeed;
+	}
+
+	float forwardSpeedError = targetForwardSpeed - currentForwardSpeed;
+	float forwardSpeedKp = 1.0f;
+
+	Debug.Log($"Fwd err: {forwardSpeedError}");
+
+	// This determines how quickly we drive forward/backward. Linked to linear twist.
+	float forwardFactor = forwardSpeedError * forwardSpeedKp;
+
+	// This determines how quickly we turn. Linked to
+
+	bool isAccelerating = Mathf.Sign(vInput) == Mathf.Sign(currentForwardSpeed);
 
 	foreach (var wc in wheelColliders)
 	{
@@ -128,8 +147,6 @@ void FixedUpdate()
 		// {
 		// 	wc.steerAngle = hInput * currentSteerRange;
 		// }
-
-		Debug.Log(forwardSpeed);
 		// If our forward movement command is zero, stop everything.
 		if (vInput == 0)
 		{
@@ -142,11 +159,11 @@ void FixedUpdate()
 			Debug.Log("Braking!");
 			// If the user is trying to go in the opposite direction
 			// apply brakes to all wheels
-			wc.brakeTorque = Mathf.Abs(vInput) * brakeTorque;
+			wc.brakeTorque = Mathf.Abs(forwardFactor) * brakeTorque;
 			wc.motorTorque = 0;
 		}
 		// If we're exceeding the speed limit, coast
-		else if (Math.Abs(forwardSpeed) > maxSpeed) {
+		else if (Math.Abs(currentForwardSpeed) > maxSpeed) {
 			Debug.Log("Coasting!");
 			wc.motorTorque = 0;
 			wc.brakeTorque = 0.1f * brakeTorque;
@@ -154,7 +171,7 @@ void FixedUpdate()
 		else
 		{
 			Debug.Log("Spinning!");
-			wc.motorTorque = vInput * currentMotorTorque;
+			wc.motorTorque = forwardFactor * currentMotorTorque;
 			wc.brakeTorque = 0;
 		}
 	}
