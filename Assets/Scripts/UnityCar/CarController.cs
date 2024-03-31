@@ -11,9 +11,6 @@ namespace UnityCar
 
 public class CarController : MonoBehaviour
 {
-[SerializeField] private float mass = 1200.0f;
-[SerializeField] private Vector3 coG = new Vector3(0.0f, 0.435f, -2.5f);
-[SerializeField] private Vector3 inertiaTensor = new Vector3(3600.0f, 3900.0f, 800.0f);
 [SerializeField] private float maxSpeed = 2f; // m/s
 [SerializeField] private float maxAngularSpeed = 0.7f; // rad/s
 [SerializeField] private float motorTorque = 200; // Nm
@@ -22,45 +19,15 @@ public class CarController : MonoBehaviour
 [SerializeField] private float angularSpeedKp = 20.0f;
 
 public Transform frWheelModel;
-
-
-public float GetVel {
-	get { return vel; }
-}
-public float GetMass {
-	get { return mass; }
-}
-public Vector3 GetCoG {
-	get { return coG; }
-}
 public Rigidbody GetRB {
-	get { return rigidbody; }
+	get { return rigidBody; }
 }
 
 private WheelCollider[] wheelColliders;
-private Rigidbody rigidbody;
-private float vel;
-private float steerAngle = 0.0f;
-
-// private AeroDynamics aeroDynamics;
-private Brakes brakes;
-private Engine engine;
-private Steering steering;
-private Suspension suspension;
-private Transmission transmission;
-private UserInput userInput;
-private MotionCommandListener rosInput;
+private Rigidbody rigidBody;
 
 void Awake()
 {
-	// aeroDynamics = GetComponent<AeroDynamics>();
-	brakes = GetComponent<Brakes>();
-	engine = GetComponent<Engine>();
-	steering = GetComponent<Steering>();
-	suspension = GetComponent<Suspension>();
-	transmission = GetComponent<Transmission>();
-	userInput = GetComponent<UserInput>();
-	rosInput = GetComponent<MotionCommandListener>();
 
 
 	// set the physics clock to 120 Hz
@@ -70,11 +37,7 @@ void Awake()
 	// WC sequence RL RR FL FR
 	wheelColliders = gameObject.GetComponentsInChildren<WheelCollider>();
 	// Get and configure the vehicle rigidbody
-	rigidbody = GetComponent<Rigidbody>();
-	// rB.mass = 800;
-	// rB.centerOfMass = coG;
-	rigidbody.inertiaTensor = inertiaTensor;
-	rigidbody.isKinematic = false;
+	rigidBody = GetComponent<Rigidbody>();
 }
 
 
@@ -83,12 +46,11 @@ void FixedUpdate()
 	// Debug.Log($"X: {inputX} // Y: {inputY} // R {inputR} // H {inputH}");
 
 	// calculate vehicle velocity in the forward direction
-	vel = transform.InverseTransformDirection(rigidbody.velocity).z;
-	float currentForwardSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
+	float currentForwardSpeed = Vector3.Dot(transform.forward, rigidBody.velocity);
 
 	// Recall that we have to negate this to make it right-handed.
 	// y is up in Unity.
-	float currentAngularSpeed = -rigidbody.angularVelocity.y;
+	float currentAngularSpeed = -rigidBody.angularVelocity.y;
 
 	// Calculate how close the car is to top speed
 	// as a number from zero to one
@@ -153,7 +115,9 @@ void FixedUpdate()
 		else if (Math.Abs(currentForwardSpeed) > maxSpeed) {
 			Debug.Log("Coasting!");
 			wc.motorTorque = 0;
-			wc.brakeTorque = 0.1f * brakeTorque;
+
+			if (angularSpeedError < 0.1)
+				wc.brakeTorque = 0.1f * brakeTorque;
 		}
 		// Otherwise, spin the wheels normally.
 		else
