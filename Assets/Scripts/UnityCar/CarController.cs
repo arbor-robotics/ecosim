@@ -17,7 +17,9 @@ public class CarController : MonoBehaviour
 [SerializeField] private float maxSpeed = 2f; // m/s
 [SerializeField] private float maxAngularSpeed = 0.7f; // rad/s
 [SerializeField] private float motorTorque = 200; // Nm
-[SerializeField] private float brakeTorque = 200; // Nm
+[SerializeField] private float brakeTorque = 200;  // Nm
+[SerializeField] private float forwardSpeedKp = 2.0f;
+[SerializeField] private float angularSpeedKp = 20.0f;
 
 public Transform frWheelModel;
 
@@ -78,25 +80,6 @@ void Awake()
 
 void FixedUpdate()
 {
-	// see if there is a controller script active and if so take input from it
-	float inputX = 0.0f;
-	float inputY = 0.0f;
-	float inputR = 0.0f;
-	float inputH = 0.0f;
-
-	if (rosInput.enabled) {
-		inputX = rosInput.ControllerInputX;
-		inputY = rosInput.ControllerInputY;
-		inputR = rosInput.ControllerInputReverse;
-		inputH = rosInput.ControllerInputHandBrake;
-	}
-	if (userInput.enabled && inputX == 0f && inputY == 0f)
-	{
-		inputX = userInput.ControllerInputX;
-		inputY = userInput.ControllerInputY;
-		inputR = userInput.ControllerInputReverse;
-		inputH = userInput.ControllerInputHandBrake;
-	}
 	// Debug.Log($"X: {inputX} // Y: {inputY} // R {inputR} // H {inputH}");
 
 	// calculate vehicle velocity in the forward direction
@@ -115,13 +98,6 @@ void FixedUpdate()
 	// (zero torque at top speed)
 	float currentMotorTorque = Mathf.Lerp(motorTorque, 0, speedFactor);
 
-
-	// update steering angle due to input, correct for ackermann and apply steering (if we have a steering script)
-	steerAngle = steering.SteerAngle(vel, inputX, steerAngle);
-	//wC[2].steerAngle = steering.AckerAdjusted(steerAngle, suspension.GetWheelBase, suspension.GetTrackFront, true);
-	//wC[3].steerAngle = steering.AckerAdjusted(steerAngle, suspension.GetWheelBase, suspension.GetTrackFront, false);
-
-
 	float vInput = Input.GetAxis("Vertical");
 	float hInput = Input.GetAxis("Horizontal");
 	float targetForwardSpeed; // m/s
@@ -136,10 +112,8 @@ void FixedUpdate()
 	}
 
 	float forwardSpeedError = targetForwardSpeed - currentForwardSpeed;
-	float forwardSpeedKp = 1.0f;
 
 	float angularSpeedError = targetAngularSpeed - currentAngularSpeed;
-	float angularSpeedKp = 10.0f;
 
 	Debug.Log($"Fwd err: {forwardSpeedError}");
 	Debug.Log($"Ang err: {angularSpeedError}");
@@ -154,12 +128,6 @@ void FixedUpdate()
 
 	foreach (var wc in wheelColliders)
 	{
-		// Apply steering to Wheel colliders that have "Steerable" enabled
-		// if (wheel.steerable)
-		// {
-		// 	wc.steerAngle = hInput * currentSteerRange;
-		// }
-		// If our forward movement command is zero, stop everything.
 
 		// Here we use the naming conventing of the WheelColliders
 		// (e.g. "WC_RL" means "WC Rear Left") to determine a WC's
@@ -169,15 +137,15 @@ void FixedUpdate()
 		// If our commands are zero, stop the robot.
 		if (vInput == 0 && hInput == 0)
 		{
-			Debug.Log("Stopping!");
+			// Debug.Log("Stopping!");
 			wc.brakeTorque = brakeTorque;
 			wc.motorTorque = 0;
 		}
+		// If the user is trying to go in the opposite direction
+		// apply brakes to all wheels
 		else if (!isAccelerating && forwardSpeedError > 0.5f)
 		{
-			Debug.Log("Braking!");
-			// If the user is trying to go in the opposite direction
-			// apply brakes to all wheels
+			// Debug.Log("Braking!");
 			wc.brakeTorque = Mathf.Abs(forwardFactor) * brakeTorque;
 			wc.motorTorque = 0;
 		}
@@ -187,12 +155,15 @@ void FixedUpdate()
 			wc.motorTorque = 0;
 			wc.brakeTorque = 0.1f * brakeTorque;
 		}
+		// Otherwise, spin the wheels normally.
 		else
 		{
 			wc.motorTorque = forwardFactor * currentMotorTorque;
 			wc.brakeTorque = 0;
 		}
 
+		// Turning is performed here! Each motor torque is augmented
+		// by the spinFactor, which is proportional to angular error
 		if (isOnRight) {
 			wc.motorTorque += spinFactor * currentMotorTorque;
 		} else {

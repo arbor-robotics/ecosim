@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2942.9106, g: 2989.8518, b: 2883.8987, a: 1}
+  m_IndirectSpecularColor: {r: 2943.2417, g: 2990.2346, b: 2883.934, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -6885,30 +6885,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3784743809472090964, guid: 39eb98849209acb40807569d1d0136ea,
+    - target: {fileID: 67153950143575034, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
-      propertyPath: m_IsActive
+      propertyPath: m_Center.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 67153950143575034, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: m_SuspensionDistance
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4388054495808944572, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4613237900554178101, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
       propertyPath: m_Name
       value: Steward
-      objectReference: {fileID: 0}
-    - target: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
@@ -6960,20 +6955,35 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6269770347372585156, guid: 39eb98849209acb40807569d1d0136ea,
+    - target: {fileID: 6569268745003348753, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
-      propertyPath: m_Enabled
-      value: 1
+      propertyPath: m_Center.y
+      value: 0.075
       objectReference: {fileID: 0}
-    - target: {fileID: 7759967204741463952, guid: 39eb98849209acb40807569d1d0136ea,
+    - target: {fileID: 6569268745003348753, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      propertyPath: m_SuspensionDistance
+      value: 0.15
       objectReference: {fileID: 0}
-    - target: {fileID: 8057127710893610527, guid: 39eb98849209acb40807569d1d0136ea,
+    - target: {fileID: 8669693140119860966, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
-      propertyPath: m_Mass
-      value: 350
+      propertyPath: m_Center.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8669693140119860966, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: m_SuspensionDistance
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8996233294506199551, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 0.075
+      objectReference: {fileID: 0}
+    - target: {fileID: 8996233294506199551, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: m_SuspensionDistance
+      value: 0.15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
