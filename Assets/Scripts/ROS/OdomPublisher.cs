@@ -36,7 +36,7 @@ void Start()
 	GameObject referenceObject = GameObject.Find("MapFrameOrigin");
 	mapOrigin = referenceObject.transform;
 
-	rb = GameObject.Find("Warthog").GetComponent<Rigidbody>();
+	rb = GameObject.Find("Steward").GetComponent<Rigidbody>();
 }
 
 void Update()

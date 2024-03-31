@@ -122,28 +122,6 @@ public float GetNoSlipWheelRPM(float vel)
 	return noSlipWheelRPM;
 }
 
-public void ApplyLLT()
-{
-	// apply anti-rollbar load transfer
-	float travelL, travelR, aRBDisp;
-	float transferForce;
-	float aRBe = rARBe;
-	float suspK = suspStiffnessRear;
-	// RL RR FL FR
-	for (int i = 0; i <= 2; i += 2)
-	{
-		if (i == 2)
-		{
-			aRBe = fARBe;
-			suspK = suspStiffnessFront;
-		}
-		travelL = wC[i].gameObject.transform.GetChild(0).transform.localPosition.y;
-		travelR = wC[i + 1].gameObject.transform.GetChild(0).transform.localPosition.y;
-		aRBDisp = Mathf.Abs(travelL - travelR);
-		transferForce = aRBDisp * aRBe * suspK / 2.0f;
-		rB.AddForceAtPosition(wC[i].transform.up * transferForce * Mathf.Sign(travelL), wC[i].transform.position);
-		rB.AddForceAtPosition(wC[i + 1].transform.up * transferForce * Mathf.Sign(travelR), wC[i + 1].transform.position);
-	}
-}
+
 }
 }
