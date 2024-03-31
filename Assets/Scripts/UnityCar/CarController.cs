@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ROS2;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace UnityCar
@@ -13,6 +15,7 @@ public class CarController : MonoBehaviour
 [SerializeField] private Vector3 coG = new Vector3(0.0f, 0.435f, -2.5f);
 [SerializeField] private Vector3 inertiaTensor = new Vector3(3600.0f, 3900.0f, 800.0f);
 [SerializeField] private float maxSpeed = 2f; // m/s
+[SerializeField] private float maxAngularSpeed = 0.7f; // rad/s
 [SerializeField] private float motorTorque = 200; // Nm
 [SerializeField] private float brakeTorque = 200; // Nm
 
@@ -100,7 +103,9 @@ void FixedUpdate()
 	vel = transform.InverseTransformDirection(rigidbody.velocity).z;
 	float currentForwardSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
 
-	Debug.Log(currentForwardSpeed);
+	// Recall that we have to negate this to make it right-handed.
+	// y is up in Unity.
+	float currentAngularSpeed = -rigidbody.angularVelocity.y;
 
 	// Calculate how close the car is to top speed
 	// as a number from zero to one
@@ -120,21 +125,28 @@ void FixedUpdate()
 	float vInput = Input.GetAxis("Vertical");
 	float hInput = Input.GetAxis("Horizontal");
 	float targetForwardSpeed; // m/s
+	float targetAngularSpeed; // rad/s
 
 	if (false)
 	{
 		// ROS message here!
 	} else {
 		targetForwardSpeed = vInput * maxSpeed;
+		targetAngularSpeed = -hInput * maxAngularSpeed;
 	}
 
 	float forwardSpeedError = targetForwardSpeed - currentForwardSpeed;
 	float forwardSpeedKp = 1.0f;
 
+	float angularSpeedError = targetAngularSpeed - currentAngularSpeed;
+	float angularSpeedKp = 10.0f;
+
 	Debug.Log($"Fwd err: {forwardSpeedError}");
+	Debug.Log($"Ang err: {angularSpeedError}");
 
 	// This determines how quickly we drive forward/backward. Linked to linear twist.
 	float forwardFactor = forwardSpeedError * forwardSpeedKp;
+	float spinFactor = angularSpeedError * angularSpeedKp;
 
 	// This determines how quickly we turn. Linked to
 
@@ -148,13 +160,20 @@ void FixedUpdate()
 		// 	wc.steerAngle = hInput * currentSteerRange;
 		// }
 		// If our forward movement command is zero, stop everything.
-		if (vInput == 0)
+
+		// Here we use the naming conventing of the WheelColliders
+		// (e.g. "WC_RL" means "WC Rear Left") to determine a WC's
+		// side on the robot.
+		bool isOnRight = wc.name.Last() == 'R';
+
+		// If our commands are zero, stop the robot.
+		if (vInput == 0 && hInput == 0)
 		{
 			Debug.Log("Stopping!");
 			wc.brakeTorque = brakeTorque;
 			wc.motorTorque = 0;
 		}
-		else if (!isAccelerating)
+		else if (!isAccelerating && forwardSpeedError > 0.5f)
 		{
 			Debug.Log("Braking!");
 			// If the user is trying to go in the opposite direction
@@ -170,9 +189,14 @@ void FixedUpdate()
 		}
 		else
 		{
-			Debug.Log("Spinning!");
 			wc.motorTorque = forwardFactor * currentMotorTorque;
 			wc.brakeTorque = 0;
+		}
+
+		if (isOnRight) {
+			wc.motorTorque += spinFactor * currentMotorTorque;
+		} else {
+			wc.motorTorque -= spinFactor * currentMotorTorque;
 		}
 	}
 }
