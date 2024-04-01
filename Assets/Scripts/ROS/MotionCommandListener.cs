@@ -23,6 +23,8 @@ private ROS2Node rosNode;
 private ISubscription<Twist> commandVelSub;
 private Publisher<Float32> linearErrorPub;
 private Publisher<Float32> angularErrorPub;
+private Publisher<Float32> targetPub;
+private Publisher<Float32> currentPub;
 private float current_forward_speed;
 private float current_yaw_rate;
 
@@ -39,15 +41,20 @@ public string nodeName;
 public string cmdTopic;
 
 // For measuring staleness
-private float lastTime = Time.time;
-private float currentTime = Time.time;
+private double lastTime = Time.time;
+DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+private double currentTime;
 
 // Other params
 public float speedLimit = 1.0f;
-public float stalenessToleranceSeconds = 0.1f;
+public float stalenessToleranceSeconds = 0.5f;
 
 public float linearError = 0f;
 public float angularError = 0f;
+public float current = 0f;
+public float target = 0f;
+
+
 
 public float LinearTwistX
 {
@@ -121,7 +128,7 @@ public float ControllerInputHandBrake
 void Start()
 {
 	rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
-
+	currentTime = (DateTime.UtcNow - epochStart).TotalSeconds;
 }
 
 void PublishErrors()
@@ -134,6 +141,16 @@ void PublishErrors()
 	angularErrorPub.Publish(new Float32
 			{
 				Data = angularError
+			});
+
+	currentPub.Publish(new Float32
+			{
+				Data = current
+			});
+
+	targetPub.Publish(new Float32
+			{
+				Data = target
 			});
 }
 
@@ -149,12 +166,16 @@ void Update()
 			commandVelSub = rosNode.CreateSubscription<Twist>(
 				"/cmd_vel", commandVelCb);
 
-			linearErrorPub = rosNode.CreatePublisher<Float32>("/control/linear_error");
-			angularErrorPub = rosNode.CreatePublisher<Float32>("/control/angular_error");
+			linearErrorPub = rosNode.CreatePublisher<Float32>("/torque_control/linear_error");
+			angularErrorPub = rosNode.CreatePublisher<Float32>("/torque_control/angular_error");
+			targetPub = rosNode.CreatePublisher<Float32>("/torque_control/target");
+			currentPub = rosNode.CreatePublisher<Float32>("/torque_control/current");
 		}
 		PublishErrors();
-
 	}
+
+	if (stalenessToleranceSeconds < 0.01)
+		Debug.LogError($"Staleness tolerance very small: {stalenessToleranceSeconds}");
 
 	// Unity requires us to get our velocity in the main thread-- that's here!
 	// Unity "z" is forward-- ROS's "x". Unity "y" is up-- ROS's "z"
@@ -166,7 +187,7 @@ void Update()
 	// Unity also requires us to set motor torques in the main thread.
 	setControllerInputs();
 
-	currentTime = Time.time;
+	currentTime = (DateTime.UtcNow - epochStart).TotalSeconds;
 }
 
 /// <summary>

@@ -27,12 +27,6 @@ private WheelCollider[] wheelColliders;
 private Rigidbody rigidBody;
 private MotionCommandListener rosListener;
 
-// Using an approx, exponentially weighted moving averge
-// https://stackoverflow.com/a/16757630
-private float forwardErrorAverage = 0;
-private float angularErrorAverage = 0;
-private int averageHistoryLength = 10;
-
 void Awake()
 {
 	// set the physics clock to 120 Hz
@@ -72,34 +66,24 @@ void FixedUpdate()
 	float targetForwardSpeed; // m/s
 	float targetAngularSpeed; // rad/s
 
-	if (rosListener.LinearTwistX != 0 || rosListener.AngularTwistZ != 0)
-	{
-		targetForwardSpeed = rosListener.LinearTwistX;
-		targetAngularSpeed = rosListener.AngularTwistZ;
-		// Debug.Log($"ROS. Targ: {targetForwardSpeed}, {targetAngularSpeed}");
-	} else {
-		targetForwardSpeed = vInput * maxSpeed;
-		targetAngularSpeed = -hInput * maxAngularSpeed;
-	}
 
-	float forwardSpeedError = targetForwardSpeed - currentForwardSpeed;
+	targetForwardSpeed = rosListener.LinearTwistX;
+	targetAngularSpeed = rosListener.AngularTwistZ;
+
+	float forwardSpeedError = rosListener.LinearTwistX - currentForwardSpeed;
 	float angularSpeedError = targetAngularSpeed - currentAngularSpeed;
 
-	forwardErrorAverage -= forwardErrorAverage / averageHistoryLength;
-	forwardErrorAverage += forwardSpeedError / averageHistoryLength;
-
-	angularErrorAverage -= angularErrorAverage / averageHistoryLength;
-	angularErrorAverage += angularSpeedError / averageHistoryLength;
-
 	// Debug.Log($"Error: {forwardSpeedError}, {angularSpeedError}");
-	rosListener.linearError = forwardErrorAverage;
-	rosListener.angularError = angularErrorAverage;
+	rosListener.linearError = forwardSpeedError;
+	rosListener.angularError = angularSpeedError;
+	rosListener.current = currentForwardSpeed;
+	rosListener.target = rosListener.LinearTwistX;
 
 	// Debug.Log($"Fwd err: {forwardSpeedError}, Ang err: {angularSpeedError}");
 
 	// This determines how quickly we drive forward/backward. Linked to linear twist.
-	float forwardFactor = forwardErrorAverage * forwardSpeedKp;
-	float spinFactor = angularErrorAverage * angularSpeedKp;
+	float forwardFactor = forwardSpeedError * forwardSpeedKp;
+	float spinFactor = angularSpeedError * angularSpeedKp;
 
 	// This determines how quickly we turn. Linked to
 
@@ -122,14 +106,14 @@ void FixedUpdate()
 		}
 		// If the user is trying to go in the opposite direction
 		// apply brakes to all wheels
-		else if (!isAccelerating && forwardErrorAverage > 0.5f)
+		else if (!isAccelerating && forwardSpeedError > 0.5f)
 		{
 			// Debug.Log("Braking!");
 			wc.brakeTorque = Mathf.Abs(forwardFactor) * brakeTorque;
 			wc.motorTorque = 0;
 		}
 		// If we're exceeding the speed limit, coast
-		else if (Math.Abs(currentForwardSpeed) > maxSpeed && Math.Abs(angularErrorAverage) < 0.1) {
+		else if (Math.Abs(currentForwardSpeed) > maxSpeed && Math.Abs(angularSpeedError) < 0.1) {
 			Debug.Log("Coasting!");
 			wc.motorTorque = 0;
 			wc.brakeTorque = 0.1f * brakeTorque;
