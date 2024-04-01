@@ -43,6 +43,30 @@ private float currentTime = Time.time;
 public float speedLimit = 1.0f;
 public float stalenessToleranceSeconds = 0.1f;
 
+public float LinearTwistX
+{
+	get
+	{
+		if (currentTime - lastTime > stalenessToleranceSeconds) {
+			return 0f;
+		} else {
+			return linear_twist_x;
+		}
+	}
+}
+
+public float AngularTwistZ
+{
+	get
+	{
+		if (currentTime - lastTime > stalenessToleranceSeconds) {
+			return 0f;
+		} else {
+			return angular_twist_z;
+		}
+	}
+}
+
 /// <summary>
 /// This is the equivalent to the Left/Right arrow keys.
 /// This turns the robot.
@@ -164,6 +188,7 @@ void setControllerInputs()
 /// <param name="msg">Twist message from subscriber</param>
 void commandVelCb(Twist msg)
 {
+	Debug.Log("GOT A NEW TWIST");
 	lastTime = currentTime;
 	linear_twist_x = (float)msg.Linear.X;
 	angular_twist_z = (float)msg.Angular.Z;

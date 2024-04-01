@@ -25,6 +25,7 @@ public Rigidbody GetRB {
 
 private WheelCollider[] wheelColliders;
 private Rigidbody rigidBody;
+private MotionCommandListener rosListener;
 
 void Awake()
 {
@@ -38,6 +39,8 @@ void Awake()
 	wheelColliders = gameObject.GetComponentsInChildren<WheelCollider>();
 	// Get and configure the vehicle rigidbody
 	rigidBody = GetComponent<Rigidbody>();
+
+	rosListener = GetComponent<MotionCommandListener>();
 }
 
 
@@ -65,9 +68,11 @@ void FixedUpdate()
 	float targetForwardSpeed; // m/s
 	float targetAngularSpeed; // rad/s
 
-	if (false)
+	if (rosListener.LinearTwistX != 0 || rosListener.AngularTwistZ != 0)
 	{
-		// ROS message here!
+		targetForwardSpeed = rosListener.LinearTwistX;
+		targetAngularSpeed = rosListener.AngularTwistZ;
+		Debug.Log($"ROS. Targ: {targetForwardSpeed}, {targetAngularSpeed}");
 	} else {
 		targetForwardSpeed = vInput * maxSpeed;
 		targetAngularSpeed = -hInput * maxAngularSpeed;
@@ -77,8 +82,7 @@ void FixedUpdate()
 
 	float angularSpeedError = targetAngularSpeed - currentAngularSpeed;
 
-	Debug.Log($"Fwd err: {forwardSpeedError}");
-	Debug.Log($"Ang err: {angularSpeedError}");
+	// Debug.Log($"Fwd err: {forwardSpeedError}, Ang err: {angularSpeedError}");
 
 	// This determines how quickly we drive forward/backward. Linked to linear twist.
 	float forwardFactor = forwardSpeedError * forwardSpeedKp;
@@ -97,7 +101,7 @@ void FixedUpdate()
 		bool isOnRight = wc.name.Last() == 'R';
 
 		// If our commands are zero, stop the robot.
-		if (vInput == 0 && hInput == 0)
+		if (targetForwardSpeed == 0 && targetAngularSpeed == 0)
 		{
 			// Debug.Log("Stopping!");
 			wc.brakeTorque = brakeTorque;
@@ -112,12 +116,11 @@ void FixedUpdate()
 			wc.motorTorque = 0;
 		}
 		// If we're exceeding the speed limit, coast
-		else if (Math.Abs(currentForwardSpeed) > maxSpeed) {
+		else if (Math.Abs(currentForwardSpeed) > maxSpeed && Math.Abs(angularSpeedError) < 0.1) {
 			Debug.Log("Coasting!");
 			wc.motorTorque = 0;
 
-			if (angularSpeedError < 0.1)
-				wc.brakeTorque = 0.1f * brakeTorque;
+			wc.brakeTorque = 0.1f * brakeTorque;
 		}
 		// Otherwise, spin the wheels normally.
 		else
