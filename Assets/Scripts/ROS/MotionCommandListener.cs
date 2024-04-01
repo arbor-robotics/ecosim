@@ -3,6 +3,7 @@ using System;
 using geometry_msgs.msg;
 using sensor_msgs.msg;
 using System.Runtime.CompilerServices;
+using std_msgs.msg;
 
 namespace ROS2
 {
@@ -20,6 +21,8 @@ public class MotionCommandListener : MonoBehaviour
 private ROS2UnityComponent rosUnityComponent;
 private ROS2Node rosNode;
 private ISubscription<Twist> commandVelSub;
+private Publisher<Float32> linearErrorPub;
+private Publisher<Float32> angularErrorPub;
 private float current_forward_speed;
 private float current_yaw_rate;
 
@@ -42,6 +45,9 @@ private float currentTime = Time.time;
 // Other params
 public float speedLimit = 1.0f;
 public float stalenessToleranceSeconds = 0.1f;
+
+public float linearError = 0f;
+public float angularError = 0f;
 
 public float LinearTwistX
 {
@@ -118,6 +124,19 @@ void Start()
 
 }
 
+void PublishErrors()
+{
+	linearErrorPub.Publish(new Float32
+			{
+				Data = linearError
+			});
+
+	angularErrorPub.Publish(new Float32
+			{
+				Data = angularError
+			});
+}
+
 void Update()
 {
 	if (rosUnityComponent.Ok())
@@ -129,7 +148,12 @@ void Update()
 
 			commandVelSub = rosNode.CreateSubscription<Twist>(
 				"/cmd_vel", commandVelCb);
+
+			linearErrorPub = rosNode.CreatePublisher<Float32>("/control/linear_error");
+			angularErrorPub = rosNode.CreatePublisher<Float32>("/control/angular_error");
 		}
+		PublishErrors();
+
 	}
 
 	// Unity requires us to get our velocity in the main thread-- that's here!

@@ -82,12 +82,12 @@ void Update()
 			Z = currentOrientation.z
 		};
 
-		float current_forward_speed = rb.velocity.magnitude;
+		float currentForwardSpeed = UnityEngine.Vector3.Dot(transform.forward, rb.velocity);
 
 		// Ensure this is right-handed for ROS
 		float yaw_rate = rb.angularVelocity.y * -1;
 
-		odomMsg.Twist.Twist.Linear.X = current_forward_speed;
+		odomMsg.Twist.Twist.Linear.X = currentForwardSpeed;
 		odomMsg.Twist.Twist.Angular.Z = yaw_rate;
 
 		// Publish everything
@@ -96,24 +96,15 @@ void Update()
 
 }
 
-Header GetHeader()
-{
-	Header header = new Header
-	{
-		Frame_id = mapFrameId,
-		Stamp = GetStamp()
-	};
-
-	return header;
-}
-
 builtin_interfaces.msg.Time GetStamp()
 {
+	DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+	double cur_time = (DateTime.UtcNow - epochStart).TotalSeconds;
 	builtin_interfaces.msg.Time stamp = new builtin_interfaces.msg.Time();
 
-	float currentTime = Time.time;
-	int secs = (int)math.floor(currentTime);
-	uint nanos = (uint)((currentTime - secs) * 1e9);
+	// float currentTime = Time.time;
+	int secs = (int)math.floor(cur_time);
+	uint nanos = (uint)((cur_time - secs) * 1e9);
 
 	stamp.Sec = secs;
 	stamp.Nanosec = nanos;
