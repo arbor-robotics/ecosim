@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 4
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
@@ -3546,6 +3546,80 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1766490383188478063, guid: a93f80d252523a14d9206681c7713ce8,
     type: 3}
   m_PrefabInstance: {fileID: 864241674}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &912631666
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1893568645}
+    m_Modifications:
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.134
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.68
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8201157730410575406, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: m_Name
+      value: RGB Camera
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d2f26ca743f1e5966b64d384acd6603c, type: 3}
+--- !u!4 &912631667 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
+    type: 3}
+  m_PrefabInstance: {fileID: 912631666}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &915261116 stripped
 Transform:
@@ -7744,6 +7818,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6315577258831269489, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6530470928094724773, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -7771,9 +7850,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 912631667}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 39eb98849209acb40807569d1d0136ea, type: 3}
+--- !u!4 &1893568645 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
+    type: 3}
+  m_PrefabInstance: {fileID: 1893568644}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1898999207 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8101256898395201125, guid: f4e4d8517c45a1a4390ceaa4221bd34e,
