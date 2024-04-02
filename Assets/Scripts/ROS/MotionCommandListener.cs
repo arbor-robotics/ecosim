@@ -41,9 +41,9 @@ public string nodeName;
 public string cmdTopic;
 
 // For measuring staleness
-private double lastTime = Time.time;
-DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+DateTime epochStart;
 private double currentTime;
+private double lastTime;
 
 // Other params
 public float speedLimit = 1.0f;
@@ -128,7 +128,10 @@ public float ControllerInputHandBrake
 void Start()
 {
 	rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
+
+	epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 	currentTime = (DateTime.UtcNow - epochStart).TotalSeconds;
+	lastTime = currentTime;
 }
 
 void PublishErrors()
