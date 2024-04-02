@@ -66,18 +66,18 @@ void FixedUpdate()
 	float targetForwardSpeed; // m/s
 	float targetAngularSpeed; // rad/s
 
+	// If we're controlling with the keyboard, listen to that.
+	targetForwardSpeed = vInput != 0 ? vInput : rosListener.LinearTwistX;
+	targetAngularSpeed = hInput != 0 ? -hInput : rosListener.AngularTwistZ;
 
-	targetForwardSpeed = rosListener.LinearTwistX;
-	targetAngularSpeed = rosListener.AngularTwistZ;
-
-	float forwardSpeedError = rosListener.LinearTwistX - currentForwardSpeed;
+	float forwardSpeedError = targetForwardSpeed - currentForwardSpeed;
 	float angularSpeedError = targetAngularSpeed - currentAngularSpeed;
 
 	// Debug.Log($"Error: {forwardSpeedError}, {angularSpeedError}");
 	rosListener.linearError = forwardSpeedError;
 	rosListener.angularError = angularSpeedError;
 	rosListener.current = currentForwardSpeed;
-	rosListener.target = rosListener.LinearTwistX;
+	rosListener.target = targetForwardSpeed;
 
 	// Debug.Log($"Fwd err: {forwardSpeedError}, Ang err: {angularSpeedError}");
 

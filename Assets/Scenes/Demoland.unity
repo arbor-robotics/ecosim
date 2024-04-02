@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2943.1077, g: 2990.4495, b: 2883.4106, a: 1}
+  m_IndirectSpecularColor: {r: 2916.975, g: 2968.3167, b: 2874.6877, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3555,6 +3555,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1893568645}
     m_Modifications:
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: nodeName
+      value: camera_front
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: cameraName
+      value: camera_front
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: cameraPixelWidth
+      value: 640
+      objectReference: {fileID: 0}
+    - target: {fileID: 1830068632625348474, guid: d2f26ca743f1e5966b64d384acd6603c,
+        type: 3}
+      propertyPath: cameraPixelHeight
+      value: 480
+      objectReference: {fileID: 0}
     - target: {fileID: 3004722648913154706, guid: d2f26ca743f1e5966b64d384acd6603c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -7762,6 +7782,11 @@ PrefabInstance:
         type: 3}
       propertyPath: sidewaysStiffness
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4586284701804823302, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: stalenessToleranceSeconds
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4613237900554178101, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
