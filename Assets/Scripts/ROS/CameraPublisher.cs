@@ -11,7 +11,6 @@ namespace ROS2
 {
 public class CameraPublisher : MonoBehaviour
 {
-// Start is called before the first frame update
 private ROS2UnityComponent rosUnityComponent;
 private ROS2Node rosNode;
 private IPublisher<sensor_msgs.msg.Image> imagePublisher;
@@ -27,6 +26,7 @@ byte[] rawCameraData;
 
 private new Camera camera;
 
+// Start is called before the first frame update
 void Start()
 {
 	rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
