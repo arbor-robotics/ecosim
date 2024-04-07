@@ -236,7 +236,6 @@ void setControllerInputs()
 /// <param name="msg">Twist message from subscriber</param>
 void commandVelCb(Twist msg)
 {
-	Debug.Log("GOT A NEW TWIST");
 	lastTime = currentTime;
 	linear_twist_x = (float)msg.Linear.X;
 	angular_twist_z = (float)msg.Angular.Z;

@@ -116,7 +116,7 @@ GameObject:
   - component: {fileID: 3004722648913154706}
   - component: {fileID: 7021877700071833489}
   m_Layer: 0
-  m_Name: LaserScanner
+  m_Name: Laser Scanner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
