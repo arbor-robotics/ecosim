@@ -37,7 +37,8 @@ private void plantSeedling()
 	Debug.Log("Planting!");
 
 	GameObject seedling = Instantiate(seedlingPrefabs[0], transform.position, Quaternion.identity);
-	seedling.transform.localScale = new Vector3(0.03f, 0.02f, 0.03f);
+	seedling.transform.localScale = new Vector3(0.1f, 0.06f, 0.1f);
+	seedling.transform.position.Set(transform.position.x, transform.position.y - 1.0f, transform.position.z);
 }
 
 // Update is called once per frame

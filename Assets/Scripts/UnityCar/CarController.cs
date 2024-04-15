@@ -116,7 +116,7 @@ void FixedUpdate()
 		else if (Math.Abs(currentForwardSpeed) > maxSpeed && Math.Abs(angularSpeedError) < 0.1) {
 			Debug.Log("Coasting!");
 			wc.motorTorque = 0;
-			wc.brakeTorque = 0.1f * brakeTorque;
+			wc.brakeTorque = 0.5f * brakeTorque;
 		}
 		// Otherwise, spin the wheels normally.
 		else
@@ -132,6 +132,8 @@ void FixedUpdate()
 		} else {
 			wc.motorTorque -= spinFactor * currentMotorTorque;
 		}
+
+		Debug.Log(wc.motorTorque);
 	}
 }
 

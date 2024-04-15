@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2928.646, g: 2977.9634, b: 2878.5002, a: 1}
+  m_IndirectSpecularColor: {r: 2927.7612, g: 2977.3774, b: 2878.3403, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -8512,6 +8512,16 @@ PrefabInstance:
         type: 3}
       propertyPath: motorTorque
       value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161278994281684011, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: angularSpeedKp
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161278994281684011, guid: 39eb98849209acb40807569d1d0136ea,
+        type: 3}
+      propertyPath: forwardSpeedKp
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
