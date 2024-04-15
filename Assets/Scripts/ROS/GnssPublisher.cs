@@ -19,7 +19,6 @@ public class GnssPublisher : MonoBehaviour
 private ROS2UnityComponent rosUnityComponent;
 private ROS2Node rosNode;
 private IPublisher<PoseWithCovarianceStamped> posePublisher;
-private IPublisher<NavSatFix> navSatFixPublisher;
 // TODO: Transform broadcaster
 
 PoseWithCovarianceStamped currentPose;
@@ -30,7 +29,6 @@ public string nodeName;
 public string poseTopic;
 public string navSatFixTopic;
 public string mapFrameId = "map";
-public string originObjectTag = "MapFrameOrigin";         // An object with this tag will be treated as the map's origin
 
 void Start()
 {
@@ -39,7 +37,6 @@ void Start()
 	// Get the pose of our map's reference point. In our case,
 	// this is a statue. TODO: Parameterize this.
 	GameObject referenceObject = GameObject.Find("MapFrameOrigin");
-
 	mapOrigin = referenceObject.transform;
 }
 
@@ -52,15 +49,13 @@ void Update()
 			// Set up the node and publisher.
 			rosNode = rosUnityComponent.CreateNode(nodeName);
 			posePublisher = rosNode.CreateSensorPublisher<PoseWithCovarianceStamped>(poseTopic);
-			navSatFixPublisher = rosNode.CreateSensorPublisher<NavSatFix>(navSatFixTopic);
 
 			// Messages shouldn't be instantiated before the ROS node is created.
 			// https://github.com/RobotecAI/ros2-for-unity/issues/53#issuecomment-1418680445
 			currentPose = new PoseWithCovarianceStamped();
 		}
 
-		// Get the current pose
-		currentPose.Header = GetHeader();
+		currentPose.Header.Stamp = GetStamp();
 
 		// var diff = transform
 
@@ -69,9 +64,6 @@ void Update()
 		{
 			X = transform.position.x - mapOrigin.position.x, // Left is y in ROS, -x in Unity
 			Y = transform.position.z - mapOrigin.position.z, // Forward is x in ROS, z in Unity
-			// X = transform.position.x - 423.11,
-			// Y = transform.position.z - 661.07,
-			// Z = mapOrigin.position.y - transform.position.y  // Up is z in ROS, y in Unity
 			Z = 0f // TODO: Add support for elevation!!
 		};
 
@@ -88,10 +80,6 @@ void Update()
 			Y = currentOrientation.y,
 			Z = currentOrientation.z
 		};
-
-		// Quaternion relative = Quaternion.Inverse(a) * b;
-
-		// TODO: Add covariance: currentPose.Pose.Covariance = ...
 
 		// Publish everything
 		posePublisher.Publish(currentPose);
