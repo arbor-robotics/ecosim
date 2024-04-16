@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2927.7612, g: 2977.3774, b: 2878.3403, a: 1}
+  m_IndirectSpecularColor: {r: 2934.9478, g: 2983.2856, b: 2881.145, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -8441,7 +8441,7 @@ PrefabInstance:
     - target: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 15.735
+      value: 6.7
       objectReference: {fileID: 0}
     - target: {fileID: 6104850889504349956, guid: 39eb98849209acb40807569d1d0136ea,
         type: 3}
@@ -8579,7 +8579,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeName: as_planting_service
-  plantingDelay: 2
+  plantingDelay: 5
   seedlingPrefabs:
   - {fileID: 6060788920606015911, guid: f5e80bd1bf6e910a9856d3589a1b6101, type: 3}
 --- !u!4 &1898999207 stripped
