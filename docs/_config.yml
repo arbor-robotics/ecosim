@@ -15,11 +15,8 @@ callouts:
     title: Extra Info
     color: blue
   important:
-    title: Important
-    color: yellow
-  warning:
-    title: Warning
-    color: red
+    title: You should know
+    color: sand
   new:
     title: New
     color: green

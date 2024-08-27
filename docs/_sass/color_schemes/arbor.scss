@@ -299,6 +299,7 @@ $red-300: $red-300 !default;
 
 // Now set our color scheme
 
+
 $sand-50: #fff9ed;
 $sand-100: #fff1d5;
 $sand-200: #ffe3b3;
@@ -310,6 +311,8 @@ $sand-700: #c4520a;
 $sand-800: #9c4010;
 $sand-900: #7d3611;
 $sand-950: #441a06;
+
+$sand-000: $sand-200; // Usred in warning callout
 
 $forest-50: #eefffb;
 $forest-100: #c6fff3;
