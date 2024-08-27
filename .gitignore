@@ -75,3 +75,6 @@ crashlytics-build.properties
 
 # VS Code
 .vscode/
+
+/[Aa]ssets/TerrainDemoScene_HDRP/*
+

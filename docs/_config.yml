@@ -1,4 +1,4 @@
-title: ArborSim
+title: EcoSim
 description: A custom simulator for the Digital Steward, built in Unity.
 theme: just-the-docs
 
@@ -26,4 +26,4 @@ callouts:
 
 aux_links:
   "Github Repo":
-    - "https://github.com/arbor-robotics/Arbor-Sim"
+    - "https://github.com/arbor-robotics/ecosim"
