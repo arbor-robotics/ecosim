@@ -15,6 +15,9 @@ public class ArcadeCarController : MonoBehaviour
     [SerializeField] float gripFactor; // 0 to 1
     [SerializeField] float tireMass;
     [SerializeField] float mass;
+    [SerializeField] float throttleMultiplier;
+
+
     float springStrength;
 
     private List<Vector3> netForces;
@@ -39,6 +42,7 @@ public class ArcadeCarController : MonoBehaviour
         // VisualizeRaycasts();
         AddSuspensionForces();
         AddSteeringForces();
+        AddThrottle();
         ApplyNetForces();
         VisualizeNetForces();
     }
@@ -137,6 +141,7 @@ public class ArcadeCarController : MonoBehaviour
 
             Vector3 wheelWorldVel = rigidbody.GetPointVelocity(wheel.transform.position);
 
+            // Direction we don't want to wheel to roll in.
             Vector3 slipDirection = wheel.transform.right;
 
             float slipVel = Vector3.Dot(slipDirection, wheelWorldVel);
@@ -147,6 +152,16 @@ public class ArcadeCarController : MonoBehaviour
 
             netForces[i] += slipDirection * tireMass * desiredAcceleration;
         }
+    }
+
+    private void AddThrottle()
+    {
+        float throttle = Input.GetAxis("Vertical");
+
+        Vector3 throttleForce = throttle * throttleMultiplier * transform.forward;
+        rigidbody.AddForce(throttleForce);
+
+        Debug.DrawLine(transform.position, transform.position + (throttleForce * 0.05f), Color.green);
     }
 
     // Update is called once per frame

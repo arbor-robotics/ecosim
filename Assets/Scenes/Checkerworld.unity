@@ -684,6 +684,7 @@ MonoBehaviour:
   gripFactor: 0.9
   tireMass: 20
   mass: 350
+  throttleMultiplier: 1000
 --- !u!1 &724990550
 GameObject:
   m_ObjectHideFlags: 0
