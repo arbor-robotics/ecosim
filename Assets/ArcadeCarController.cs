@@ -8,6 +8,7 @@ public class ArcadeCarController : MonoBehaviour
 {
 
     [SerializeField] GameObject[] rayPoints;
+    [SerializeField] GameObject[] wheels;
     [SerializeField] float wheelRadius;
     [SerializeField] float suspensionDistance;
     [SerializeField] float springFactor; // 0 to 1
@@ -16,6 +17,7 @@ public class ArcadeCarController : MonoBehaviour
     [SerializeField] float tireMass;
     [SerializeField] float mass;
     [SerializeField] float throttleMultiplier;
+    [SerializeField] float turnMultiplier;
 
 
     float springStrength;
@@ -104,7 +106,8 @@ public class ArcadeCarController : MonoBehaviour
         for (int i = 0; i < rayPoints.Length; i++)
         {
 
-            GameObject wheel = rayPoints[i];
+            GameObject rayOrigin = rayPoints[i];
+            GameObject wheel = wheels[i];
 
             // Shoot a ray down
 
@@ -112,23 +115,28 @@ public class ArcadeCarController : MonoBehaviour
 
             float wheelRestDistance = wheelRadius + suspensionDistance;
 
-            if (Physics.Raycast(wheel.transform.position, -Vector3.up, out hit, wheelRestDistance))
+            if (Physics.Raycast(rayOrigin.transform.position, -Vector3.up, out hit, wheelRestDistance))
             {
                 float wheelOffset = hit.distance - wheelRestDistance;
-                Debug.Log($"Ground is {hit.distance} meters below {wheel.name}. Wheel pushed up {wheelOffset}");
-                Debug.DrawLine(wheel.transform.position, hit.point, Color.magenta);
+                Debug.Log($"Ground is {hit.distance} meters below {rayOrigin.name}. Wheel pushed up {wheelOffset}");
+                Debug.DrawLine(rayOrigin.transform.position, hit.point, Color.magenta);
 
-                Vector3 wheelWorldVel = rigidbody.GetPointVelocity(wheel.transform.position);
+
+                Vector3 wheelWorldVel = rigidbody.GetPointVelocity(rayOrigin.transform.position);
 
                 float offset = wheelRestDistance - hit.distance;
-                float vel = Vector3.Dot(wheel.transform.up, wheelWorldVel);
+                float vel = Vector3.Dot(rayOrigin.transform.up, wheelWorldVel);
 
                 float force = (offset * springStrength) - (vel * springDamper);
 
-                netForces[i] += wheel.transform.up * force;
+                netForces[i] += rayOrigin.transform.up * force;
                 // rigidbody.AddForceAtPosition(wheel.transform.up * force, wheel.transform.position);
 
                 Debug.Log($"Adding force {force}");
+
+                Vector3 wheelPosition = hit.point;
+                wheelPosition.y += wheelRadius;
+                wheel.transform.position = wheelPosition;
             }
         }
     }
@@ -157,11 +165,21 @@ public class ArcadeCarController : MonoBehaviour
     private void AddThrottle()
     {
         float throttle = Input.GetAxis("Vertical");
+        float turn = Input.GetAxis("Horizontal");
 
-        Vector3 throttleForce = throttle * throttleMultiplier * transform.forward;
-        rigidbody.AddForce(throttleForce);
+        float carSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
 
-        Debug.DrawLine(transform.position, transform.position + (throttleForce * 0.05f), Color.green);
+        for (int i = 0; i < rayPoints.Length; i++)
+        {
+            GameObject wheel = rayPoints[i];
+
+            Vector3 accelDir = wheel.transform.forward;
+
+            netForces[i] += accelDir * throttle * throttleMultiplier;
+        }
+
+        rigidbody.AddTorque(transform.up * turn * turnMultiplier);
+        // Debug.DrawLine(transform.position, transform.position + (throttleForce * 0.05f), Color.green);
     }
 
     // Update is called once per frame
