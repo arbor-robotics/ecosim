@@ -66,6 +66,7 @@ public class ArcadeCarController : MonoBehaviour
         for (int i = 0; i < netForces.Count; i++)
         {
             Vector3 force = netForces[i];
+
             float magnitude = force.magnitude;
 
 
@@ -74,6 +75,9 @@ public class ArcadeCarController : MonoBehaviour
             magnitude = Math.Min(forceLimit, magnitude);
             magnitude = Math.Max(-forceLimit, magnitude);
             force *= magnitude;
+
+            if (float.IsNaN(force.x))
+                continue;
 
             GameObject wheel = rayPoints[i];
 
