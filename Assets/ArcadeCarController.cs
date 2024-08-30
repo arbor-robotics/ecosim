@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,17 +8,22 @@ using UnityEngine;
 public class ArcadeCarController : MonoBehaviour
 {
 
+    [SerializeField] bool showDebug;
     [SerializeField] GameObject[] rayPoints;
     [SerializeField] GameObject[] wheels;
     [SerializeField] float wheelRadius;
     [SerializeField] float suspensionDistance;
     [SerializeField] float springFactor; // 0 to 1
     [SerializeField] float springDamper;
-    [SerializeField] float gripFactor; // 0 to 1
+    [SerializeField] float sideGridFactor; // 0 to 1. How much the tire resists slip in the side direction.
+    [SerializeField] float forwardGripFactor; // 0 to 1. How much the tire resists slip in the forward direction.
     [SerializeField] float tireMass;
     [SerializeField] float mass;
     [SerializeField] float throttleMultiplier;
     [SerializeField] float turnMultiplier;
+    [SerializeField] float speedLimit; // m/s
+    [SerializeField] float forceLimit; // N
+
 
 
     float springStrength;
@@ -60,6 +66,15 @@ public class ArcadeCarController : MonoBehaviour
         for (int i = 0; i < netForces.Count; i++)
         {
             Vector3 force = netForces[i];
+            float magnitude = force.magnitude;
+
+
+            // Apply force limits
+            force /= magnitude;
+            magnitude = Math.Min(forceLimit, magnitude);
+            magnitude = Math.Max(-forceLimit, magnitude);
+            force *= magnitude;
+
             GameObject wheel = rayPoints[i];
 
             rigidbody.AddForceAtPosition(force, wheel.transform.position);
@@ -74,7 +89,8 @@ public class ArcadeCarController : MonoBehaviour
             GameObject wheel = rayPoints[i];
             Vector3 force = netForces[i];
 
-            Debug.DrawLine(wheel.transform.position, wheel.transform.position + force * scale, Color.yellow);
+            if (showDebug)
+                Debug.DrawLine(wheel.transform.position, wheel.transform.position + force * scale, Color.yellow);
         }
     }
 
@@ -118,9 +134,12 @@ public class ArcadeCarController : MonoBehaviour
             if (Physics.Raycast(rayOrigin.transform.position, -Vector3.up, out hit, wheelRestDistance))
             {
                 float wheelOffset = hit.distance - wheelRestDistance;
-                Debug.Log($"Ground is {hit.distance} meters below {rayOrigin.name}. Wheel pushed up {wheelOffset}");
-                Debug.DrawLine(rayOrigin.transform.position, hit.point, Color.magenta);
 
+                if (showDebug)
+                {
+                    Debug.Log($"Ground is {hit.distance} meters below {rayOrigin.name}. Wheel pushed up {wheelOffset}");
+                    Debug.DrawLine(rayOrigin.transform.position, hit.point, Color.magenta);
+                }
 
                 Vector3 wheelWorldVel = rigidbody.GetPointVelocity(rayOrigin.transform.position);
 
@@ -130,9 +149,6 @@ public class ArcadeCarController : MonoBehaviour
                 float force = (offset * springStrength) - (vel * springDamper);
 
                 netForces[i] += rayOrigin.transform.up * force;
-                // rigidbody.AddForceAtPosition(wheel.transform.up * force, wheel.transform.position);
-
-                Debug.Log($"Adding force {force}");
 
                 Vector3 wheelPosition = hit.point;
                 wheelPosition.y += wheelRadius;
@@ -154,7 +170,7 @@ public class ArcadeCarController : MonoBehaviour
 
             float slipVel = Vector3.Dot(slipDirection, wheelWorldVel);
 
-            float desiredVelChange = -slipVel * gripFactor;
+            float desiredVelChange = -slipVel * sideGridFactor;
 
             float desiredAcceleration = desiredVelChange / Time.fixedDeltaTime;
 
@@ -169,17 +185,49 @@ public class ArcadeCarController : MonoBehaviour
 
         float carSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
 
-        for (int i = 0; i < rayPoints.Length; i++)
+        if (carSpeed > speedLimit && throttle >= 0f)
         {
-            GameObject wheel = rayPoints[i];
+            if (showDebug)
+                Debug.Log("Car at speed limit. Coasting.");
+        }
+        else
+        {
+            for (int i = 0; i < rayPoints.Length; i++)
+            {
+                GameObject wheel = rayPoints[i];
 
-            Vector3 accelDir = wheel.transform.forward;
+                Vector3 accelDir = wheel.transform.forward;
+                Vector3 wheelWorldVel = rigidbody.GetPointVelocity(wheel.transform.position);
 
-            netForces[i] += accelDir * throttle * throttleMultiplier;
+                float wheelForwardSpeed = Vector3.Dot(accelDir, wheelWorldVel);
+
+                // Apply brakes
+                if (Math.Abs(throttle) < 0.1f && Math.Abs(turn) < 0.1)
+                {
+                    float desiredVelChange;
+                    if (rigidbody.velocity.magnitude > .1)
+                    {
+                        forwardGripFactor -= 0.1f;
+                    }
+                    else
+                    {
+                        forwardGripFactor += 0.1f;
+                    }
+                    forwardGripFactor = Math.Min(0f, forwardGripFactor);
+                    forwardGripFactor = Math.Max(5f, forwardGripFactor);
+                    desiredVelChange = -wheelForwardSpeed * forwardGripFactor;
+                    float desiredSlipAcceleration = desiredVelChange / Time.fixedDeltaTime;
+                    netForces[i] += accelDir * tireMass * desiredSlipAcceleration;
+                }
+
+
+
+                netForces[i] += accelDir * throttle * throttleMultiplier;
+
+            }
         }
 
         rigidbody.AddTorque(transform.up * turn * turnMultiplier);
-        // Debug.DrawLine(transform.position, transform.position + (throttleForce * 0.05f), Color.green);
     }
 
     // Update is called once per frame
