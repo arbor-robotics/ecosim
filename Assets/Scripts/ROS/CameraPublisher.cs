@@ -1,21 +1,16 @@
 using UnityEngine;
-using System.IO;
-using System;
-using std_msgs.msg;
-using System.Linq;
-using System.Threading.Tasks;
+// using std_msgs.msg;
 using Unity.Collections;
-using System.Security.Cryptography;
 
 namespace ROS2
 {
     public class CameraPublisher : MonoBehaviour
     {
         // Start is called before the first frame update
-        private ROS2UnityComponent rosUnityComponent;
-        private ROS2Node rosNode;
-        private IPublisher<sensor_msgs.msg.Image> imagePublisher;
-        private IPublisher<sensor_msgs.msg.CameraInfo> cameraInfoPublisher;
+        // private ROS2UnityComponent rosUnityComponent;
+        // private ROS2Node rosNode;
+        // private IPublisher<sensor_msgs.msg.Image> imagePublisher;
+        // private IPublisher<sensor_msgs.msg.CameraInfo> cameraInfoPublisher;
 
         public string nodeName;
         public string cameraName;
@@ -29,20 +24,20 @@ namespace ROS2
 
         void Start()
         {
-            rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
-            camera = GetComponent<Camera>();
+            // rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
+            // camera = GetComponent<Camera>();
 
-            // Fix flipped camera (ROS has different vertical axis than Unity)
-            Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
-            camera.projectionMatrix *= scale;
+            // // Fix flipped camera (ROS has different vertical axis than Unity)
+            // Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
+            // camera.projectionMatrix *= scale;
 
-            renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
+            // renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
 
-            // 4 bytes per pixel (RGBA)
-            rawCameraData = new byte[cameraPixelWidth * cameraPixelHeight * 4];
+            // // 4 bytes per pixel (RGBA)
+            // rawCameraData = new byte[cameraPixelWidth * cameraPixelHeight * 4];
 
-            screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
-            camera.targetTexture = renderTexture;
+            // screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
+            // camera.targetTexture = renderTexture;
         }
 
         /// <summary>
@@ -63,23 +58,23 @@ namespace ROS2
 
         void Update()
         {
-            if (rosUnityComponent.Ok())
-            {
-                if (rosNode == null)
-                {
-                    // Set up the node and publisher.
-                    rosNode = rosUnityComponent.CreateNode(nodeName);
-                    imagePublisher = rosNode.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + cameraName + "/image_color");
-                    cameraInfoPublisher = rosNode.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + cameraName + "/camera_info");
-                }
-                sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
+            // if (rosUnityComponent.Ok())
+            // {
+            //     if (rosNode == null)
+            //     {
+            //         // Set up the node and publisher.
+            //         rosNode = rosUnityComponent.CreateNode(nodeName);
+            //         imagePublisher = rosNode.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + cameraName + "/image_color");
+            //         cameraInfoPublisher = rosNode.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + cameraName + "/camera_info");
+            //     }
+            //     sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
 
-                image_msg.Data = rawCameraData;
-                image_msg.Encoding = "rgba8";
-                image_msg.Height = (uint)cameraPixelHeight;
-                image_msg.Width = (uint)cameraPixelWidth;
-                imagePublisher.Publish(image_msg);
-            }
+            //     image_msg.Data = rawCameraData;
+            //     image_msg.Encoding = "rgba8";
+            //     image_msg.Height = (uint)cameraPixelHeight;
+            //     image_msg.Width = (uint)cameraPixelWidth;
+            //     imagePublisher.Publish(image_msg);
+            // }
             GL.invertCulling = true;
             camera.Render();
             GL.invertCulling = false;

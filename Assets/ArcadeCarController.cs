@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Rider.Unity.Editor;
 using UnityEngine;
 
 public class ArcadeCarController : MonoBehaviour
