@@ -6,6 +6,7 @@ public class ArcadeCarController : MonoBehaviour
 {
 
     [SerializeField] bool showDebug;
+    [SerializeField] bool enableManualControl;
     [SerializeField] GameObject[] rayPoints;
     [SerializeField] GameObject[] wheels;
     [SerializeField] float wheelRadius;
@@ -20,6 +21,9 @@ public class ArcadeCarController : MonoBehaviour
     [SerializeField] float turnMultiplier;
     [SerializeField] float speedLimit; // m/s
     [SerializeField] float forceLimit; // N
+
+    public float throttle = 0f;
+    public float turn = 0f;
 
 
 
@@ -43,6 +47,9 @@ public class ArcadeCarController : MonoBehaviour
     void FixedUpdate()
     {
         ResetNetForces();
+
+        if (enableManualControl)
+            GetKeyboardInput();
         // VisualizeWheelAxes();
         // VisualizeRaycasts();
         AddSuspensionForces();
@@ -179,10 +186,16 @@ public class ArcadeCarController : MonoBehaviour
         }
     }
 
+    private void GetKeyboardInput()
+    {
+        throttle = Input.GetAxis("Vertical");
+        turn = Input.GetAxis("Horizontal");
+    }
+
     private void AddThrottle()
     {
-        float throttle = Input.GetAxis("Vertical");
-        float turn = Input.GetAxis("Horizontal");
+        // float throttle = Input.GetAxis("Vertical");
+        // float turn = Input.GetAxis("Horizontal");
 
         float carSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
 

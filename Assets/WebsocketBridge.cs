@@ -4,6 +4,7 @@ using UnityEngine;
 
 using NativeWebSocket;
 using System;
+using SimpleJSON;
 
 [Serializable]
 public struct SubscriptionRequest
@@ -12,14 +13,48 @@ public struct SubscriptionRequest
     public string topic;
 }
 
+[Serializable]
+public struct RosbridgeMessage
+{
+    public string op;
+    public string topic;
+    // public string service;
+    // public string id;
+    public string msg;
+}
+
+public struct TwistMsg
+{
+    public Vector3 linear;
+    public Vector3 angular;
+}
+
 public class WebsocketBridge : MonoBehaviour
 {
     WebSocket websocket;
+    ArcadeCarController carController;
 
     // Start is called before the first frame update
+
+    private TwistMsg ToTwist(JSONNode str)
+    {
+        TwistMsg msg = new();
+
+        msg.linear.x = str["linear"]["x"];
+        msg.linear.y = str["linear"]["y"];
+        msg.linear.z = str["linear"]["z"];
+
+        msg.angular.x = str["angular"]["x"];
+        msg.angular.y = str["angular"]["y"];
+        msg.angular.z = str["angular"]["z"];
+
+        return msg;
+    }
     async void Start()
     {
         websocket = new WebSocket("ws://localhost:9090");
+
+        carController = GetComponent<ArcadeCarController>();
 
         websocket.OnOpen += async () =>
         {
@@ -28,7 +63,7 @@ public class WebsocketBridge : MonoBehaviour
             SubscriptionRequest req = new()
             {
                 op = "subscribe",
-                topic = "/test"
+                topic = "/cmd_vel"
             };
 
             string reqString = JsonUtility.ToJson(req);
@@ -55,8 +90,22 @@ public class WebsocketBridge : MonoBehaviour
             // Debug.Log(bytes);
 
             // getting the message as a string
-            var message = System.Text.Encoding.UTF8.GetString(bytes);
-            Debug.Log("OnMessage! " + message);
+            var messageString = System.Text.Encoding.UTF8.GetString(bytes);
+
+            JSONNode root = JSONNode.Parse(messageString);
+            Debug.Log("OnMessage! " + messageString);
+
+            if (root["topic"] == "/cmd_vel")
+            {
+                TwistMsg msg = ToTwist(root["msg"]);
+                carController.throttle = msg.linear.x;
+                carController.turn = msg.angular.z;
+            }
+            Debug.Log(root["msg"]);
+
+            // RosbridgeMessage msg = JsonUtility.FromJson<RosbridgeMessage>(messageString);
+            // Debug.Log(msg.msg);
+
         };
 
         // Keep sending messages at every 0.3s
