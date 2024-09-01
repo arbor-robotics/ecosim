@@ -20,24 +20,27 @@ namespace ROS2
         Texture2D screenShot;
         byte[] rawCameraData;
 
-        private new Camera camera;
+
+        public new Camera camera;
+
+        WebsocketBridge websocketBridge;
 
         void Start()
         {
             // rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
-            // camera = GetComponent<Camera>();
+            // camera = Camera.main;
 
             // // Fix flipped camera (ROS has different vertical axis than Unity)
-            // Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
-            // camera.projectionMatrix *= scale;
+            Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
+            camera.projectionMatrix *= scale;
 
-            // renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
+            renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
 
-            // // 4 bytes per pixel (RGBA)
-            // rawCameraData = new byte[cameraPixelWidth * cameraPixelHeight * 4];
+            // 4 bytes per pixel (RGBA)
+            rawCameraData = new byte[cameraPixelWidth * cameraPixelHeight * 4];
 
-            // screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
-            // camera.targetTexture = renderTexture;
+            screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
+            camera.targetTexture = renderTexture;
         }
 
         /// <summary>
@@ -75,6 +78,9 @@ namespace ROS2
             //     image_msg.Width = (uint)cameraPixelWidth;
             //     imagePublisher.Publish(image_msg);
             // }
+            
+
+
             GL.invertCulling = true;
             camera.Render();
             GL.invertCulling = false;

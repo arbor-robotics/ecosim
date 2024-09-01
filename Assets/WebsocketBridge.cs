@@ -21,6 +21,7 @@ public struct RosbridgeMessage
     // public string service;
     // public string id;
     public string msg;
+    public string type;
 }
 
 public struct TwistMsg
@@ -50,6 +51,23 @@ public class WebsocketBridge : MonoBehaviour
 
         return msg;
     }
+
+    async void AdvertisePublishers()
+    {
+        // Front camera
+        RosbridgeMessage req = new()
+        {
+            op = "advertise",
+            topic = "/camera/front/image_color",
+            type = "sensor_msgs/Image"
+        };
+
+        string reqString = JsonUtility.ToJson(req);
+
+        Debug.Log($"Sending: {reqString} {req}");
+
+        await websocket.SendText(reqString);
+    }
     async void Start()
     {
         websocket = new WebSocket("ws://localhost:9090");
@@ -71,6 +89,8 @@ public class WebsocketBridge : MonoBehaviour
             Debug.Log($"Sending: {reqString} {req}");
 
             await websocket.SendText(reqString);
+
+            AdvertisePublishers();
 
         };
 
@@ -120,6 +140,18 @@ public class WebsocketBridge : MonoBehaviour
 #if !UNITY_WEBGL || UNITY_EDITOR
         websocket.DispatchMessageQueue();
 #endif
+    }
+
+    async void PublishCameraImage(byte[] imageData)
+    {
+        if (websocket.State == WebSocketState.Open)
+        {
+            // Sending bytes
+            // await websocket.Send(new byte[] { 10, 20, 30 });
+
+            // Sending plain text
+            await websocket.SendText("YEET");
+        }
     }
 
     async void SendWebSocketMessage(string message)
