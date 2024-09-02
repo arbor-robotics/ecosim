@@ -25,13 +25,17 @@ namespace ROS2
 
         WebsocketBridge websocketBridge;
 
+        Publisher imagePub;
+
         void Start()
         {
             // rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
             // camera = Camera.main;
 
+            websocketBridge = GetComponent<WebsocketBridge>();
+
             // // Fix flipped camera (ROS has different vertical axis than Unity)
-            Matrix4x4 scale = Matrix4x4.Scale (new Vector3 (1, -1, 1));
+            Matrix4x4 scale = Matrix4x4.Scale(new Vector3(1, -1, 1));
             camera.projectionMatrix *= scale;
 
             renderTexture = new RenderTexture(cameraPixelWidth, cameraPixelHeight, 24);
@@ -41,6 +45,16 @@ namespace ROS2
 
             screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
             camera.targetTexture = renderTexture;
+
+            imagePub = websocketBridge.CreatePublisher("/camera_front/image_color", "sensor_msgs/Image");
+
+            // ImageMessage msg = new()
+            // {
+            //     height = (uint)cameraPixelHeight,
+            //     width = (uint)cameraPixelWidth
+            // };
+            // imagePub.publish(msg);
+
         }
 
         /// <summary>
@@ -61,24 +75,37 @@ namespace ROS2
 
         void Update()
         {
-            // if (rosUnityComponent.Ok())
-            // {
-            //     if (rosNode == null)
-            //     {
-            //         // Set up the node and publisher.
-            //         rosNode = rosUnityComponent.CreateNode(nodeName);
-            //         imagePublisher = rosNode.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + cameraName + "/image_color");
-            //         cameraInfoPublisher = rosNode.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + cameraName + "/camera_info");
-            //     }
-            //     sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
+            if (websocketBridge.isReady)
+            {
+                // if (rosNode == null)
+                // {
+                //     // Set up the node and publisher.
+                //     rosNode = rosUnityComponent.CreateNode(nodeName);
+                //     imagePublisher = rosNode.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + cameraName + "/image_color");
+                //     cameraInfoPublisher = rosNode.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + cameraName + "/camera_info");
+                // }
+                // sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
 
-            //     image_msg.Data = rawCameraData;
-            //     image_msg.Encoding = "rgba8";
-            //     image_msg.Height = (uint)cameraPixelHeight;
-            //     image_msg.Width = (uint)cameraPixelWidth;
-            //     imagePublisher.Publish(image_msg);
-            // }
-            
+                ImageMessage msg = new()
+                {
+                    width = (uint)cameraPixelWidth,
+                    height = (uint)cameraPixelHeight,
+                    data = rawCameraData,
+                    encoding = "rgba8",
+                    step = (uint)cameraPixelWidth * 4,
+
+                };
+
+                imagePub.publish(msg);
+                // print($"Published image with width {cameraPixelWidth}");
+
+                // image_msg.Data = rawCameraData;
+                // image_msg.Encoding = "rgba8";
+                // image_msg.Height = (uint)cameraPixelHeight;
+                // image_msg.Width = (uint)cameraPixelWidth;
+                // imagePublisher.Publish(image_msg);
+            }
+
 
 
             GL.invertCulling = true;
