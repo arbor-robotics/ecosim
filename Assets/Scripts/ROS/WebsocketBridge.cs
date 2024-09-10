@@ -1,253 +1,82 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+// using System;
+// using System.Collections;
+// using System.Collections.Generic;
+// using UnityEngine;
 
-using NativeWebSocket;
-using System;
-using SimpleJSON;
-using UnityEditor.VersionControl;
-using ROS2;
-using System.Text.Json;
-using System.Security.Cryptography;
+// using NativeWebSocket;
 
-[Serializable]
-public struct SubscriptionRequest
-{
-    public string op;
-    public string topic;
-}
+// public class WebsocketBridge : MonoBehaviour
+// {
+//     public WebSocket websocket;
+//     public bool isOpen = false;
 
-[Serializable]
-public struct RosbridgeMessage
-{
-    public string op;
-    public string topic;
-    // public string service;
-    // public string id;
-    public RosMessage msg;
-    public string type;
-}
-public class Subscription
-{
-    private Action cb;
-    public string id;
-    public string topic;
-    public Subscription(string newId, string newTopic, Action newCb)
-    {
-        cb = newCb;
-        id = newId;
-        topic = newTopic;
-    }
-}
+//     // Start is called before the first frame update
+//     async void Start()
+//     {
+//         // websocket = new WebSocket("ws://echo.websocket.org");
+//         websocket = new WebSocket("ws://localhost:3000");
 
-public class Publisher
-{
-    public string id;
-    public string topic;
-    private Queue<string> sendQueue_;
-    public Publisher(string newId, string newTopic, Queue<string> sendQueue)
-    {
-        id = newId;
-        topic = newTopic;
-        sendQueue_ = sendQueue;
-    }
+//         websocket.OnOpen += () =>
+//         {
+//             Debug.Log("Connection open!");
+//             isOpen = true;
+//         };
 
-    public void publish(RosMessage msg)
-    {
-        string msgString = JsonUtility.ToJson(msg);
+//         websocket.OnError += (e) =>
+//         {
+//             Debug.Log("Error! " + e);
+//         };
 
-        // string publishOp = $"{{ op: 'publish','topic': {topic},'msg': {msgString}}}";
-        string publishOp = $"{{ \"op\": \"publish\",\"topic\": \"{topic}\", \"msg\":{msgString}}}";
-        // Debug.Log($"Publishing {json}");
-        sendQueue_.Enqueue(publishOp);
-    }
-}
+//         websocket.OnClose += (e) =>
+//         {
+//             Debug.Log("Connection closed!");
+//             isOpen = false;
+//         };
 
-public class WebsocketBridge : MonoBehaviour
-{
-    WebSocket websocket;
-    ArcadeCarController carController;
+//         websocket.OnMessage += (bytes) =>
+//         {
+//             // Reading a plain text message
 
-    private List<Subscription> subscriptions;
-    private List<Publisher> publishers;
+//             // var message = System.Text.Encoding.UTF8.GetString(bytes);
+//             // Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
+//         };
 
-    private Queue<string> sendQueue;
+//         // Keep sending messages at every 0.3s
+//         InvokeRepeating("SendWebSocketMessage", 0.0f, 0.3f);
 
-    public bool isReady;
+//         await websocket.Connect();
+//     }
 
+//     public async void SendBytes(byte[] message)
+//     {
+//         if (websocket.State == WebSocketState.Open)
+//         {
+//             await websocket.Send(message);
 
-    // public Subscription CreateSubscription<T>(string topic, Action<T> callback)
-    // {
-    //     string guid = Guid.NewGuid().ToString();
-    //     Subscription<T> sub = new Subscription<T>(guid, topic, callback);
-    //     subscriptions.Add((Subscription<RosMessage>)sub);
+//         }
+//     }
 
-    //     Debug.Log($"Added subscription with ID {sub.id}");
+//     void Update()
+//     {
+// #if !UNITY_WEBGL || UNITY_EDITOR
+//         websocket.DispatchMessageQueue();
+// #endif
+//     }
 
-    //     return sub;
-    // }
+//     async void SendWebSocketMessage()
+//     {
+//         if (websocket.State == WebSocketState.Open)
+//         {
+//             // Sending bytes
+//             await websocket.Send(new byte[] { 10, 20, 30 });
 
-    public Publisher CreatePublisher(string topic, string type)
-    {
-        string guid = Guid.NewGuid().ToString();
-        Publisher pub = new Publisher(guid, topic, sendQueue);
-        publishers.Add(pub);
+//             // Sending plain text
+//             await websocket.SendText("plain text message");
+//         }
+//     }
 
-        RosbridgeMessage req = new()
-        {
-            op = "advertise",
-            topic = topic,
-            type = type
-        };
-
-        string reqString = JsonUtility.ToJson(req);
-
-        Debug.Log($"Queued advertisement for {topic}");
-
-        // websocket.SendText(reqString);
-        sendQueue.Enqueue(reqString);
-
-        Debug.Log($"Added publisher with ID {pub.id}");
-
-        return pub;
-    }
-
-    // private TwistMsg ToTwist(JSONNode str)
-    // {
-    //     TwistMsg msg = new();
-
-    //     msg.linear.x = str["linear"]["x"];
-    //     msg.linear.y = str["linear"]["y"];
-    //     msg.linear.z = str["linear"]["z"];
-
-    //     msg.angular.x = str["angular"]["x"];
-    //     msg.angular.y = str["angular"]["y"];
-    //     msg.angular.z = str["angular"]["z"];
-
-    //     return msg;
-    // }
-
-    async void Start()
-    {
-        isReady = false;
-        websocket = new WebSocket("ws://localhost:9090");
-
-        publishers = new() { };
-        subscriptions = new() { };
-        sendQueue = new();
-
-        carController = GetComponent<ArcadeCarController>();
-
-        websocket.OnOpen += async () =>
-        {
-            Debug.Log("Connection open!");
-            isReady = true;
-
-            SubscriptionRequest req = new()
-            {
-                op = "subscribe",
-                topic = "/cmd_vel"
-            };
-
-            string reqString = JsonUtility.ToJson(req);
-
-            Debug.Log($"Sending: {reqString} {req}");
-
-            await websocket.SendText(reqString);
-
-
-        };
-
-        websocket.OnError += (e) =>
-            {
-                Debug.Log("Error! " + e);
-            };
-
-        websocket.OnClose += (e) =>
-        {
-            Debug.Log("Connection closed!");
-            isReady = false;
-        };
-
-        websocket.OnMessage += (bytes) =>
-        {
-            // Debug.Log("OnMessage!");
-            // Debug.Log(bytes);
-
-            // getting the message as a string
-            var messageString = System.Text.Encoding.UTF8.GetString(bytes);
-
-            JSONNode root = JSONNode.Parse(messageString);
-            Debug.Log("OnMessage! " + messageString);
-
-            if (root["topic"] == "/cmd_vel")
-            {
-                // TwistMsg msg = ToTwist(root["msg"]);
-                // carController.throttle = msg.linear.x;
-                // carController.turn = msg.angular.z;
-            }
-            Debug.Log(root["msg"]);
-
-            // RosbridgeMessage msg = JsonUtility.FromJson<RosbridgeMessage>(messageString);
-            // Debug.Log(msg.msg);
-
-        };
-
-        // Keep sending messages at every 0.3s
-        // InvokeRepeating("SendWebSocketMessage", 0.0f, 0.3f);
-
-        // waiting for messages
-        await websocket.Connect();
-    }
-
-    void Update()
-    {
-#if !UNITY_WEBGL || UNITY_EDITOR
-        websocket.DispatchMessageQueue();
-#endif
-
-        if (isReady)
-        {
-            while (sendQueue.Count > 0)
-            {
-                string request = sendQueue.Dequeue();
-                // Debug.Log($"Sending {request}");
-                websocket.SendText(request);
-            }
-        }
-    }
-
-    public void scheduleMessage(string message)
-    {
-        sendQueue.Enqueue(message);
-    }
-
-    async void PublishCameraImage(byte[] imageData)
-    {
-        if (websocket.State == WebSocketState.Open)
-        {
-            // Sending bytes
-            // await websocket.Send(new byte[] { 10, 20, 30 });
-
-            // Sending plain text
-            await websocket.SendText("YEET");
-        }
-    }
-
-    async void SendWebSocketMessage(string message)
-    {
-        if (websocket.State == WebSocketState.Open)
-        {
-            // Sending bytes
-            // await websocket.Send(new byte[] { 10, 20, 30 });
-
-            // Sending plain text
-            await websocket.SendText(message);
-        }
-    }
-
-    private async void OnApplicationQuit()
-    {
-        await websocket.Close();
-    }
-}
+//     private async void OnApplicationQuit()
+//     {
+//         await websocket.Close();
+//     }
+// }

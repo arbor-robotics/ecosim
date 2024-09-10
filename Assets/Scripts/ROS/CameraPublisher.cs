@@ -25,7 +25,7 @@ namespace ROS2
 
         WebsocketBridge websocketBridge;
 
-        Publisher imagePub;
+        // Publisher imagePub;
 
         void Start()
         {
@@ -46,7 +46,7 @@ namespace ROS2
             screenShot = new Texture2D(cameraPixelWidth, cameraPixelHeight, TextureFormat.RGBA32, false);
             camera.targetTexture = renderTexture;
 
-            imagePub = websocketBridge.CreatePublisher("/camera_front/image_color", "sensor_msgs/Image");
+            // imagePub = websocketBridge.CreatePublisher("/camera_front/image_color", "sensor_msgs/Image");
 
             // ImageMessage msg = new()
             // {
@@ -54,6 +54,7 @@ namespace ROS2
             //     width = (uint)cameraPixelWidth
             // };
             // imagePub.publish(msg);
+
 
         }
 
@@ -75,36 +76,22 @@ namespace ROS2
 
         void Update()
         {
-            if (websocketBridge.isReady)
-            {
-                // if (rosNode == null)
-                // {
-                //     // Set up the node and publisher.
-                //     rosNode = rosUnityComponent.CreateNode(nodeName);
-                //     imagePublisher = rosNode.CreatePublisher<sensor_msgs.msg.Image>("/camera/" + cameraName + "/image_color");
-                //     cameraInfoPublisher = rosNode.CreatePublisher<sensor_msgs.msg.CameraInfo>("/camera/" + cameraName + "/camera_info");
-                // }
-                // sensor_msgs.msg.Image image_msg = new sensor_msgs.msg.Image();
+            // if (websocketBridge.directIsReady)
+            // {
 
-                ImageMessage msg = new()
-                {
-                    width = (uint)cameraPixelWidth,
-                    height = (uint)cameraPixelHeight,
-                    data = rawCameraData,
-                    encoding = "rgba8",
-                    step = (uint)cameraPixelWidth * 4,
+            //     websocketBridge.sendDirectMessage(rawCameraData);
+            //     print($"Published image with width {cameraPixelWidth}");
 
-                };
+            //     // image_msg.Data = rawCameraData;
+            //     // image_msg.Encoding = "rgba8";
+            //     // image_msg.Height = (uint)cameraPixelHeight;
+            //     // image_msg.Width = (uint)cameraPixelWidth;
+            //     // imagePublisher.Publish(image_msg);
+            // }
 
-                imagePub.publish(msg);
-                // print($"Published image with width {cameraPixelWidth}");
+            // if (websocketBridge.isOpen)
+            //     websocketBridge.SendBytes(rawCameraData);
 
-                // image_msg.Data = rawCameraData;
-                // image_msg.Encoding = "rgba8";
-                // image_msg.Height = (uint)cameraPixelHeight;
-                // image_msg.Width = (uint)cameraPixelWidth;
-                // imagePublisher.Publish(image_msg);
-            }
 
 
 
@@ -121,9 +108,11 @@ namespace ROS2
             // Graphics.CopyTexture(renderTexture, screenShot);
 
             // byte[] imageData = screenShot.EncodeToPNG();
-            var pixels = screenShot.GetPixelData<byte>(0);
+            // var pixels = screenShot.GetPixelData<byte>(0);
+            var pixels = screenShot.EncodeToJPG();
+            websocketBridge.SendBytes(pixels);
             // Debug.Log(pixels.Length);
-            PopulateBytesFromNativeArray(pixels);
+            // PopulateBytesFromNativeArray(pixels);
             // byte[] imageData = screenShot.GetRawTextureData<byte>().ToArray();
             // pixels = null;
 
