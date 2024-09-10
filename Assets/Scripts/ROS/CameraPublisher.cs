@@ -1,9 +1,16 @@
 using UnityEngine;
 // using std_msgs.msg;
 using Unity.Collections;
+using System.Linq;
 
 namespace ROS2
 {
+    public enum MessageType : byte
+    {
+        IMAGE = 0x00,
+        SUBSCRIBE = 0x01,
+        TELEOP = 0x02
+    }
     public class CameraPublisher : MonoBehaviour
     {
         // Start is called before the first frame update
@@ -110,7 +117,9 @@ namespace ROS2
             // byte[] imageData = screenShot.EncodeToPNG();
             // var pixels = screenShot.GetPixelData<byte>(0);
             var pixels = screenShot.EncodeToJPG();
-            websocketBridge.SendBytes(pixels);
+
+            byte[] kiss_msg = new byte[] { (byte)MessageType.IMAGE }.Concat(pixels).ToArray();
+            websocketBridge.SendBytes(kiss_msg);
             // Debug.Log(pixels.Length);
             // PopulateBytesFromNativeArray(pixels);
             // byte[] imageData = screenShot.GetRawTextureData<byte>().ToArray();
