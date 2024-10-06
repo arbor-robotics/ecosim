@@ -4,20 +4,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using NativeWebSocket;
+using ROS2;
 
 public class WebsocketBridge : MonoBehaviour
 {
     WebSocket websocket;
+    int port = 8765;
+
+    public float throttle = 0f;
+    public float turn = 0f;
 
     // Start is called before the first frame update
     async void Start()
     {
-        int port = 8765;
         websocket = new WebSocket($"ws://localhost:{port}");
 
         websocket.OnOpen += () =>
         {
             Debug.Log("Connection open!");
+            // Subscribe to teleop commands
+            Subscribe(KISS.MessageType.TELEOP);
         };
 
         websocket.OnError += (e) =>
@@ -33,19 +39,24 @@ public class WebsocketBridge : MonoBehaviour
         websocket.OnMessage += (bytes) =>
         {
             // Debug.Log("OnMessage!");
-            // Debug.Log(bytes);
+            if (bytes[0] == (byte)MessageType.TELEOP)
+            {
+                throttle = ((float)bytes[1]) / 128 - 1;
+                turn = ((float)bytes[2]) / 128 - 1;
+            }
 
             // getting the message as a string
             // var message = System.Text.Encoding.UTF8.GetString(bytes);
             // Debug.Log("OnMessage! " + message);
         };
 
-        // Keep sending messages at every 0.3s
-        // InvokeRepeating("SendWebSocketMessage", 0.0f, 0.3f);
+        InvokeRepeating("TryConnection", 0.0f, 1.0f);
 
         // waiting for messages
-        Debug.Log($"Trying to connect to port {port}");
-        await websocket.Connect();
+        TryConnection();
+        // Debug.Log($"Trying to connect to port {port}");
+        // await websocket.Connect();
+
     }
 
     void Update()
@@ -53,6 +64,17 @@ public class WebsocketBridge : MonoBehaviour
 #if !UNITY_WEBGL || UNITY_EDITOR
         websocket.DispatchMessageQueue();
 #endif
+    }
+
+    async void TryConnection()
+    {
+        if (websocket.State == WebSocketState.Closed)
+        {
+            Debug.Log($"Trying to connect to port {port}");
+            await websocket.Connect();
+
+
+        }
     }
 
     async void SendWebSocketMessage()
@@ -67,6 +89,16 @@ public class WebsocketBridge : MonoBehaviour
         }
     }
 
+    public void Subscribe(KISS.MessageType type)
+    {
+        if (websocket.State != WebSocketState.Open)
+        {
+            Debug.LogWarning("Could not request subscription. Connection not open.");
+            return;
+        }
+        SendBytes(new byte[] { (byte)KISS.MessageType.SUBSCRIBE, (byte)type });
+    }
+
     public async void SendBytes(byte[] msg)
     {
         if (websocket.State == WebSocketState.Open)
@@ -76,6 +108,10 @@ public class WebsocketBridge : MonoBehaviour
 
             // Sending plain text
             // await websocket.SendText("plain text message");
+        }
+        else
+        {
+            Debug.LogWarning("Could not send bytes. Connection not open.");
         }
     }
 

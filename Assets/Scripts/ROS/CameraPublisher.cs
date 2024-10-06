@@ -32,6 +32,8 @@ namespace ROS2
 
         WebsocketBridge websocketBridge;
 
+        Rect rect;
+
         // Publisher imagePub;
 
         void Start()
@@ -100,17 +102,17 @@ namespace ROS2
             //     websocketBridge.SendBytes(rawCameraData);
 
 
-
-
+            // Memory leak is between HERE
+            // vvvvvvvvvvvvvvvvvvvvvvvvvvv
             GL.invertCulling = true;
             camera.Render();
             GL.invertCulling = false;
-
-            Rect rect = new Rect(0, 0, cameraPixelWidth, cameraPixelHeight);
-
+            rect = new Rect(0, 0, cameraPixelWidth, cameraPixelHeight);
             RenderTexture.active = renderTexture;
             screenShot.ReadPixels(rect, 0, 0);
             RenderTexture.active = null;
+            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            // and HERE
 
             // Graphics.CopyTexture(renderTexture, screenShot);
 

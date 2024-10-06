@@ -26,12 +26,12 @@ public class ArcadeCarController : MonoBehaviour
     public float turn = 0f;
 
 
-
     float springStrength;
 
     private List<Vector3> netForces;
 
     new Rigidbody rigidbody;
+    WebsocketBridge bridge;
 
     // Start is called before the first frame update
     void Start()
@@ -42,6 +42,8 @@ public class ArcadeCarController : MonoBehaviour
         springStrength = mass * 9.8f / 4.0f / (suspensionDistance / 2);
 
         netForces = new() { new Vector3(), new Vector3(), new Vector3(), new Vector3() };
+
+        bridge = GetComponent<WebsocketBridge>();
     }
 
     void FixedUpdate()
@@ -50,6 +52,8 @@ public class ArcadeCarController : MonoBehaviour
 
         if (enableManualControl)
             GetKeyboardInput();
+        else
+            GetTeleopInput();
         // VisualizeWheelAxes();
         // VisualizeRaycasts();
         AddSuspensionForces();
@@ -190,6 +194,23 @@ public class ArcadeCarController : MonoBehaviour
     {
         throttle = Input.GetAxis("Vertical");
         turn = Input.GetAxis("Horizontal");
+    }
+
+    private void GetTeleopInput()
+    {
+        if (throttle > 1)
+        {
+            Debug.LogWarning($"Throttle of {throttle} was greater than 1. Ignoring");
+            throttle = 0f;
+        }
+        else if (throttle < -1)
+        {
+            Debug.LogWarning($"Throttle of {throttle} was smaller than -1. Ignoring.");
+            throttle = 0f;
+        }
+        throttle = bridge.throttle;
+        turn = bridge.turn;
+        // Debug.Log($"({throttle}, {turn})");
     }
 
     private void AddThrottle()
