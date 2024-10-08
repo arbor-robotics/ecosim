@@ -15,7 +15,7 @@ public class WebsocketBridge : MonoBehaviour
     public float turn = 0f;
 
     // Start is called before the first frame update
-    async void Start()
+    void Start()
     {
         websocket = new WebSocket($"ws://localhost:{port}");
 
