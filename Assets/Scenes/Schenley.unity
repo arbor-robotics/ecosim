@@ -822,8 +822,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeName: depth_camera_node
   cameraName: camera_front
-  cameraPixelWidth: 800
-  cameraPixelHeight: 600
+  hFovDegrees: 101
+  vFovDegrees: 68
+  widthPixels: 5
+  heightPixels: 3
   camera: {fileID: 0}
 --- !u!1001 &308396468
 PrefabInstance:
@@ -7109,7 +7111,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1823913491}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.26693356, y: 0.000000028720944, z: -0.00000000795524, w: 0.96371496}
+  m_LocalRotation: {x: 0.26693356, y: -0.000000028720944, z: 0.00000000795524, w: 0.96371496}
   m_LocalPosition: {x: 958.5, y: 68.39, z: 274.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7594,7 +7596,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1922094174}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.26693356, y: 0.000000028720944, z: -0.00000000795524, w: 0.96371496}
+  m_LocalRotation: {x: 0.26693356, y: -0.000000028720944, z: 0.00000000795524, w: 0.96371496}
   m_LocalPosition: {x: 958.5, y: 68.39, z: 274.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
