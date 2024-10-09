@@ -9,7 +9,8 @@ namespace ROS2
     {
         IMAGE = 0x00,
         SUBSCRIBE = 0x01,
-        TELEOP = 0x02
+        TELEOP = 0x02,
+        POINTCLOUD = 0x03,
     }
     public class CameraPublisher : MonoBehaviour
     {
