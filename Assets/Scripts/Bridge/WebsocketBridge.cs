@@ -39,7 +39,7 @@ public class WebsocketBridge : MonoBehaviour
         websocket.OnMessage += (bytes) =>
         {
             // Debug.Log("OnMessage!");
-            if (bytes[0] == (byte)MessageType.TELEOP)
+            if (bytes[0] == (byte)KISS.MessageType.TELEOP)
             {
                 throttle = ((float)bytes[1]) / 128 - 1;
                 turn = ((float)bytes[2]) / 128 - 1;

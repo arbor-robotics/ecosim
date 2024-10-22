@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEngine.Assertions;
 
 namespace ROS2
 {
@@ -36,7 +37,10 @@ namespace ROS2
 
         float maxRange = 10f; // meters
 
-        bool showDebug = true;
+        public bool showDebug = true;
+
+        public float maxNoiseMultiplier = 1.1f;
+        float minNoiseMultiplier;
 
         // Publisher imagePub;
 
@@ -45,6 +49,10 @@ namespace ROS2
             websocketBridge = GetComponent<WebsocketBridge>();
             rigidbody = GetComponent<Rigidbody>();
 
+            Assert.IsTrue(maxNoiseMultiplier > 1);
+            Assert.IsTrue(maxNoiseMultiplier < 2);
+
+            minNoiseMultiplier = 2 - maxNoiseMultiplier;
         }
 
         void Update()
@@ -97,36 +105,80 @@ namespace ROS2
             foreach (Vector3 point in points)
             {
 
-                Vector3 localPoint = transform.InverseTransformPoint(point);
-                int x_int = (int)(localPoint.x * 100); // Convert from meters to centimeters, then to int
+                // CONVERSION FROM UNITY TO ROS COORDINATE SYSTEM:
+                // Unity z -> ROS x
+                // Unity -x -> ROS y
+                // UNITY y -> ROS z
 
-                // int firstByte = x_int << 0;
+                Vector3 localPoint = transform.InverseTransformPoint(point);
+
+
+                int x_int = (int)(localPoint.z * 100 * UnityEngine.Random.Range(minNoiseMultiplier, maxNoiseMultiplier)); // Convert from meters to centimeters, then to int
 
                 x_int = Math.Min(x_int, (int)Math.Pow(2, 16)); // Ensure that point will fit in 2 bytes
 
-                int secondByte = x_int % 255;
-                int firstByte = x_int / 255;
+                byte[] x_bytes = BitConverter.GetBytes((short)x_int);
 
-                byte[] bytes = BitConverter.GetBytes((short)x_int);
-
-                // Debug.Log(x_int);
-                string bytes_as_string = "";
-
-                // Debug.Log($"{b} ");
-                foreach (byte b in bytes)
+                foreach (byte b in x_bytes)
                 {
-                    bytes_as_string += $"{b}_";
+                    // bytes_as_string += $"{b}_";
                     pointcloudBytes[byte_idx] = b;
+                    // Debug.Log(b);
                     byte_idx++;
                 }
-                // bytes_as_string += $"{bytes[1]}_";
-                // pointcloudBytes[byte_idx] = bytes[1];
 
-                Debug.Log($"{x_int} -> {bytes_as_string}");
-                // Debug.Log($"{point.x} -> {x_int} -> {bytes.ToHexString()}");
+                // Y
+                int y_int = (int)(localPoint.x * -1 * 100 * UnityEngine.Random.Range(minNoiseMultiplier, maxNoiseMultiplier)); // Convert from meters to centimeters, then to int
+
+                y_int = Math.Min(y_int, (int)Math.Pow(2, 16)); // Ensure that point will fit in 2 bytes
+
+                byte[] y_bytes = BitConverter.GetBytes((short)y_int);
+
+                foreach (byte b in y_bytes)
+                {
+                    // bytes_as_string += $"{b}_";
+                    pointcloudBytes[byte_idx] = b;
+                    // Debug.Log(b);
+                    byte_idx++;
+                }
+
+                // Debug.Log($"{point.y} -> {y_int} -> {bytes.ToHexString()}");
+
+                // Z
+                int z_int = (int)(localPoint.y * 100 * UnityEngine.Random.Range(minNoiseMultiplier, maxNoiseMultiplier)); // Convert from meters to centimeters, then to int
+
+                z_int = Math.Min(z_int, (int)Math.Pow(2, 16)); // Ensure that point will fit in 2 bytes
+
+                byte[] z_bytes = BitConverter.GetBytes((short)z_int);
+
+                foreach (byte b in z_bytes)
+                {
+                    // bytes_as_string += $"{b}_";
+                    pointcloudBytes[byte_idx] = b;
+                    // Debug.Log(b);
+                    byte_idx++;
+                }
+
+                // Debug.Log($"{x_int}, {y_int} {z_int} -> {x_bytes.ToHexString()}_{y_bytes.ToHexString()}_{z_bytes.ToHexString()}");
             }
 
-            byte[] kiss_msg = new byte[] { (byte)MessageType.POINTCLOUD }.Concat(pointcloudBytes).ToArray();
+            Debug.Log($"Sending {points.Count * 6} ({byte_idx + 1}) bytes");
+            // Debug.Log(x_int);
+            // string bytes_as_string = "";
+
+            // foreach (byte b in pointcloudBytes)
+            // {
+            //     bytes_as_string += $"{b}_";
+            //     // pointcloudBytes[byte_idx] = b;
+            //     // byte_idx++;
+            // }
+
+            // Debug.Log($"{b} ");
+            // bytes_as_string += $"{bytes[1]}_";
+            // pointcloudBytes[byte_idx] = bytes[1];
+
+            // Debug.Log($"{bytes_as_string}");
+            byte[] kiss_msg = new byte[] { (byte)KISS.MessageType.POINTCLOUD }.Concat(pointcloudBytes).ToArray();
             websocketBridge.SendBytes(kiss_msg);
         }
 

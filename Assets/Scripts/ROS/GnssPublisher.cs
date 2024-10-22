@@ -10,6 +10,8 @@ using Unity.Collections;
 using System.Security.Cryptography;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEngine.Assertions;
+
 
 namespace ROS2
 {
@@ -26,101 +28,80 @@ namespace ROS2
 		// NavSatFix currentFix;
 		UnityEngine.Transform mapOrigin;
 
-		public string nodeName;
-		public string poseTopic;
-		public string navSatFixTopic;
-		public string mapFrameId = "map";
-		public string originObjectTag = "MapFrameOrigin";         // An object with this tag will be treated as the map's origin
+
+		public float maxNoiseCm = 10f;
+		WebsocketBridge websocketBridge;
+
+		// YES this is hardcoded.
+		// NO I don't have time to change it.
+		// WSH Oct 22 '24
+		float topLeftLat = 40.44823504f;
+		float topLeftLon = -79.95278458f;
+		float topLeftEastM = 0f;
+		float topLeftNorthM = 1177f;
+		float botRightLat = 40.43743552f;
+		float botRightLon = -79.93809829f;
+		float botRightEastM = 1177f;
+		float botRightNorthM = 0f;
+
 
 		void Start()
 		{
-			// rosUnityComponent = GetComponentInParent<ROS2UnityComponent>();
-
-			// Get the pose of our map's reference point. In our case,
-			// this is a statue. TODO: Parameterize this.
-			GameObject referenceObject = GameObject.FindGameObjectWithTag("MapFrameOrigin");
-
-			mapOrigin = referenceObject.transform;
+			websocketBridge = GetComponent<WebsocketBridge>();
 		}
 
 		void Update()
 		{
-			// if (rosUnityComponent.Ok())
-			// {
-			// 	if (rosNode == null)
-			// 	{
-			// 		// Set up the node and publisher.
-			// 		rosNode = rosUnityComponent.CreateNode(nodeName);
-			// 		posePublisher = rosNode.CreateSensorPublisher<PoseWithCovarianceStamped>(poseTopic);
-			// 		navSatFixPublisher = rosNode.CreateSensorPublisher<NavSatFix>(navSatFixTopic);
+			// 1. Get ego latitude and longitude as floats
+			float egoEastM = transform.position.x;
+			float egoNorthtM = transform.position.z;
+			float egoAltM = transform.position.y;
 
-			// 		// Messages shouldn't be instantiated before the ROS node is created.
-			// 		// https://github.com/RobotecAI/ros2-for-unity/issues/53#issuecomment-1418680445
-			// 		currentPose = new PoseWithCovarianceStamped();
-			// 	}
+			float latDelta = topLeftLat - botRightLat;
+			float lonDelta = botRightLon - topLeftLon; // Positive, ~0.01469
+			float eastMDelta = botRightEastM - topLeftEastM;
+			float northMDelta = topLeftNorthM - botRightNorthM;
 
-			// 	// Get the current pose
-			// 	currentPose.Header = GetHeader();
+			float eastFraction = (egoEastM - topLeftEastM) / eastMDelta;
+			float northFraction = (egoNorthtM - botRightNorthM) / northMDelta;
 
-			// 	// var diff = transform
+			// Debug.Log($"{eastFraction}, {northFraction}");
 
-			// 	// TODO: Dejank this! WSH
-			// 	currentPose.Pose.Pose.Position = new Point
-			// 	{
-			// 		// X = transform.position.z - mapOrigin.position.z, // Forward is x in ROS, z in Unity
-			// 		X = transform.position.x - 423.11,
-			// 		// Y = -1 * (transform.position.x - mapOrigin.position.x), // Left is y in ROS, -x in Unity
-			// 		Y = transform.position.z - 661.07,
-			// 		// Z = mapOrigin.position.y - transform.position.y  // Up is z in ROS, y in Unity
-			// 		Z = 0f // TODO: Add support for elevation!!
-			// 	};
+			float egoLon = topLeftLon + lonDelta * eastFraction;
+			float egoLat = botRightLat + latDelta * northFraction;
 
-			// 	UnityEngine.Quaternion currentOrientation = transform.rotation.Unity2Ros();
-			// 	currentPose.Pose.Pose.Orientation = new geometry_msgs.msg.Quaternion
-			// 	{
-			// 		W = currentOrientation.w,
-			// 		X = currentOrientation.x,
-			// 		Y = currentOrientation.y,
-			// 		Z = currentOrientation.z
-			// 	};
+			// 2. Convert to bytes and store in an array
 
-			// 	// Quaternion relative = Quaternion.Inverse(a) * b;
+			byte[] fixBytes = new byte[17]; // first byte is dtype, plus 4 bytes per float, (lat, lon, alt, heading)
 
-			// 	// TODO: Add covariance: currentPose.Pose.Covariance = ...
+			int byte_idx = 0;
 
-			// 	// Publish everything
-			// 	posePublisher.Publish(currentPose);
-			// }
+			// Debug.Log($"{egoLon}, {egoLat}");
 
+			byte[] latBytes = BitConverter.GetBytes(egoLat);
+			byte[] lonBytes = BitConverter.GetBytes(egoLon);
+			byte[] altBytes = BitConverter.GetBytes(egoAltM);
+
+			latBytes.CopyTo(fixBytes, 1);
+			lonBytes.CopyTo(fixBytes, 5);
+			altBytes.CopyTo(fixBytes, 9);
+
+			fixBytes[0] = (byte)KISS.MessageType.GNSS_FIX;
+
+			// Debug.Log($"{lonBytes.Length}, {lonBytes}");
+
+			string bytes_as_string = "";
+
+			foreach (byte b in fixBytes)
+			{
+				bytes_as_string += $"{b}_";
+			}
+
+			Debug.Log($"{bytes_as_string}");
+
+			// byte[] kiss_msg = new byte[] { (byte)KISS.MessageType.GNSS_FIX }.Concat(poseBytes).ToArray();
+			websocketBridge.SendBytes(fixBytes);
 		}
-
-		// Header GetHeader()
-		// {
-		// 	Header header = new Header
-		// 	{
-		// 		Frame_id = mapFrameId,
-		// 		Stamp = GetStamp()
-		// 	};
-
-		// 	return header;
-		// }
-
-		// builtin_interfaces.msg.Time GetStamp()
-		// {
-		// 	builtin_interfaces.msg.Time stamp = new builtin_interfaces.msg.Time();
-
-		// 	float currentTime = Time.time;
-		// 	int secs = (int)math.floor(currentTime);
-		// 	uint nanos = (uint)((currentTime - secs) * 1e9);
-
-		// 	stamp.Sec = secs;
-		// 	stamp.Nanosec = nanos;
-
-		// 	return stamp;
-		// }
-
-		// }
-
 	}
 
 }  // namespace ROS2
