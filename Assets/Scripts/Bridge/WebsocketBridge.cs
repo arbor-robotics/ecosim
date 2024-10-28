@@ -43,6 +43,7 @@ public class WebsocketBridge : MonoBehaviour
             {
                 throttle = ((float)bytes[1]) / 128 - 1;
                 turn = ((float)bytes[2]) / 128 - 1;
+                turn *= -1;
             }
 
             // getting the message as a string

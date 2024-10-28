@@ -22,8 +22,10 @@ public class ArcadeCarController : MonoBehaviour
     [SerializeField] float speedLimit; // m/s
     [SerializeField] float forceLimit; // N
 
-    public float throttle = 0f;
-    public float turn = 0f;
+    float throttle = 0f;
+    public float targetForwardSpeed = 0f;
+    public float targetTurnSpeed = 0f;
+    float turn = 0f;
 
 
     float springStrength;
@@ -208,8 +210,8 @@ public class ArcadeCarController : MonoBehaviour
             Debug.LogWarning($"Throttle of {throttle} was smaller than -1. Ignoring.");
             throttle = 0f;
         }
-        throttle = bridge.throttle;
-        turn = bridge.turn;
+        targetForwardSpeed = bridge.throttle;
+        targetTurnSpeed = bridge.turn;
         // Debug.Log($"({throttle}, {turn})");
     }
 
@@ -219,6 +221,16 @@ public class ArcadeCarController : MonoBehaviour
         // float turn = Input.GetAxis("Horizontal");
 
         float carSpeed = Vector3.Dot(transform.forward, rigidbody.velocity);
+
+        // Bang bang baby!
+        if (carSpeed < targetForwardSpeed - 0.1f)
+        {
+            throttle = 1f;
+        }
+        else if (carSpeed > targetForwardSpeed + 0.1f)
+        {
+            throttle = -1f;
+        }
 
         if (carSpeed > speedLimit && throttle >= 0f)
         {
@@ -262,7 +274,21 @@ public class ArcadeCarController : MonoBehaviour
             }
         }
 
-        rigidbody.AddTorque(transform.up * turn * turnMultiplier);
+        float current_turn = rigidbody.angularVelocity.y;
+        if (Mathf.Abs(targetTurnSpeed) < 0.01f)
+        {
+            // Do nothing
+        }
+        else if (current_turn < targetTurnSpeed)
+        {
+            rigidbody.AddTorque(transform.up * 1f * turnMultiplier);
+        }
+        else if (current_turn > targetTurnSpeed)
+        {
+            rigidbody.AddTorque(transform.up * -1f * turnMultiplier);
+        }
+
+        Debug.Log($"Lin: {targetForwardSpeed - carSpeed}, ang: {targetTurnSpeed - current_turn}");
     }
 
     // Update is called once per frame

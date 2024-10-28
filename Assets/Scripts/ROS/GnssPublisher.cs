@@ -70,25 +70,29 @@ namespace ROS2
 			float egoLon = topLeftLon + lonDelta * eastFraction;
 			float egoLat = botRightLat + latDelta * northFraction;
 
+			float yaw = 2 * Mathf.PI - (transform.rotation.eulerAngles[1] / 180f * Mathf.PI);
+
+			// Set yaw so that 0 points East per ENU conventions
+			yaw += Mathf.PI / 2;
+
+			if (yaw > 2 * Mathf.PI)
+				yaw -= 2 * Mathf.PI;
+
 			// 2. Convert to bytes and store in an array
 
 			byte[] fixBytes = new byte[17]; // first byte is dtype, plus 4 bytes per float, (lat, lon, alt, heading)
 
-			int byte_idx = 0;
-
-			// Debug.Log($"{egoLon}, {egoLat}");
-
 			byte[] latBytes = BitConverter.GetBytes(egoLat);
 			byte[] lonBytes = BitConverter.GetBytes(egoLon);
 			byte[] altBytes = BitConverter.GetBytes(egoAltM);
+			byte[] yawBytes = BitConverter.GetBytes(yaw);
 
 			latBytes.CopyTo(fixBytes, 1);
 			lonBytes.CopyTo(fixBytes, 5);
 			altBytes.CopyTo(fixBytes, 9);
+			yawBytes.CopyTo(fixBytes, 13);
 
 			fixBytes[0] = (byte)KISS.MessageType.GNSS_FIX;
-
-			// Debug.Log($"{lonBytes.Length}, {lonBytes}");
 
 			string bytes_as_string = "";
 
@@ -97,9 +101,8 @@ namespace ROS2
 				bytes_as_string += $"{b}_";
 			}
 
-			Debug.Log($"{bytes_as_string}");
+			// Debug.Log($"{bytes_as_string}");
 
-			// byte[] kiss_msg = new byte[] { (byte)KISS.MessageType.GNSS_FIX }.Concat(poseBytes).ToArray();
 			websocketBridge.SendBytes(fixBytes);
 		}
 	}
