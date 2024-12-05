@@ -1,4 +1,8 @@
+> [!NOTE]  
+> EcoSim is no longer being developed by Will Heitman at Arbor Robotics, as the research project has concluded. This repository has been archived.
 # EcoSim
+
+![Screenshot of EcoSim](screenshot.png)
 
 A Unity-based simulator for testing our tree-planting robot. We use the Universal Rendering Pipeline (URP) to achieve realistic graphics with cross-platform capabilities.
 
