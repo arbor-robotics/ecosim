@@ -96,7 +96,7 @@ namespace ROS2
                 }
             }
 
-            Debug.Log($"Hit {points.Count} points");
+            // Debug.Log($"Hit {points.Count} points");
 
             byte[] pointcloudBytes = new byte[points.Count * 6]; // 6 bytes per point
 
@@ -162,7 +162,7 @@ namespace ROS2
                 // Debug.Log($"{x_int}, {y_int} {z_int} -> {x_bytes.ToHexString()}_{y_bytes.ToHexString()}_{z_bytes.ToHexString()}");
             }
 
-            Debug.Log($"Sending {points.Count * 6} ({byte_idx + 1}) bytes");
+            // Debug.Log($"Sending {points.Count * 6} ({byte_idx + 1}) bytes");
             // Debug.Log(x_int);
             // string bytes_as_string = "";
 

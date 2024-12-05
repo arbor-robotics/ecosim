@@ -42,6 +42,7 @@ public class WebsocketBridge : MonoBehaviour
             if (bytes[0] == (byte)KISS.MessageType.TELEOP)
             {
                 throttle = ((float)bytes[1]) / 128 - 1;
+                throttle *= 10; // Byte is interally scaled by ten. Re-scale.
                 turn = ((float)bytes[2]) / 128 - 1;
                 turn *= -1;
             }
